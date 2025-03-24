@@ -1,0 +1,68 @@
+.app {
+  width: 400px;
+  min-height: 500px;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3367d6;
+}
+
+.prompt-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.prompt-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.prompt-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+input, textarea {
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}

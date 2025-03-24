@@ -1,63 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PromptList from './components/PromptList';
 import PromptForm from './components/PromptForm';
+import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
 import './App.css';
 
-// Dummy data
-const dummyPrompts = [
-  {
-    id: '1',
-    title: 'Code Review',
-    content: 'Please review this code and suggest improvements...',
-    createdAt: '2023-01-01T12:00:00Z',
-    updatedAt: '2023-01-01T12:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Blog Post Ideas',
-    content: 'Generate 5 blog post ideas about React development...',
-    createdAt: '2023-01-02T12:00:00Z',
-    updatedAt: '2023-01-02T12:00:00Z'
-  }
-];
-
 function App() {
-  const [prompts, setPrompts] = useState(dummyPrompts);
+  const [prompts, setPrompts] = useState([]);
   const [currentPrompt, setCurrentPrompt] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const loadPrompts = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await fetchPrompts();
+      setPrompts(data);
+    } catch (err) {
+      setError('Failed to load prompts. Please try again.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPrompts();
+  }, []);
 
   const handleEdit = (prompt) => {
     setCurrentPrompt(prompt);
     setIsFormVisible(true);
   };
 
-  const handleDelete = (id) => {
-    setPrompts(prompts.filter(prompt => prompt.id !== id));
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this prompt?')) {
+      setIsLoading(true);
+      try {
+        await deletePrompt(id);
+        await loadPrompts();
+      } catch (err) {
+        setError('Failed to delete prompt. Please try again.');
+        console.error('Error deleting prompt: ',err)
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
-  const handleSave = (prompt) => {
-    if (currentPrompt) {
-      // Edit existing prompt
-      setPrompts(prompts.map(p => p.id === prompt.id ? prompt : p));
-    } else {
-      // Add new prompt
-      setPrompts([...prompts, prompt]);
+  const handleSave = async (promptData) => {
+    setIsLoading(true);
+    try {
+      if (currentPrompt) {
+        // Update existing prompt
+        await updatePrompt(currentPrompt._id, promptData);
+      } else {
+        // Create new prompt
+        await createPrompt(promptData);
+      }
+      await loadPrompts();
+      setCurrentPrompt(null);
+      setIsFormVisible(false);
+    } catch (err) {
+      setError('Failed to save prompt. Please try again.');
+      console.error('Error saving prompt: ',err)
+    } finally {
+      setIsLoading(false);
     }
-    setCurrentPrompt(null);
-    setIsFormVisible(false);
   };
 
   return (
     <div className="app">
       <header>
         <h1>Prompy</h1>
-        <button onClick={() => {
-          setCurrentPrompt(null);
-          setIsFormVisible(true);
-        }}>
-          New Prompt
-        </button>
+        <div className="header-actions">
+          <button 
+            onClick={loadPrompts} 
+            disabled={isLoading}
+            className="refresh-button"
+          >
+            {isLoading ? 'Loading...' : 'Refresh'}
+          </button>
+          <button 
+            onClick={() => {
+              setCurrentPrompt(null);
+              setIsFormVisible(true);
+            }}
+            disabled={isLoading}
+            className="new-button"
+          >
+            New Prompt
+          </button>
+        </div>
       </header>
+      
+      {error && <div className="error-message">{error}</div>}
       
       <main>
         {isFormVisible ? (
@@ -68,12 +106,14 @@ function App() {
               setCurrentPrompt(null);
               setIsFormVisible(false);
             }} 
+            isLoading={isLoading}
           />
         ) : (
           <PromptList 
             prompts={prompts} 
             onEdit={handleEdit} 
             onDelete={handleDelete} 
+            isLoading={isLoading}
           />
         )}
       </main>

@@ -5,15 +5,32 @@
 `http://localhost:5000` (Development)
 
 ## Authentication
-All endpoints require authentication (to be implemented). For now, a userId is passed in the request.
+All endpoints require authentication using JWT tokens. To authenticate:
 
-## Endpoints
+1. Redirect users to `/api/auth/google` to initiate Google OAuth2 login
+2. After successful authentication, users will be redirected to your frontend with a JWT token
+3. Include this token in the Authorization header of all API requests:
+   `Authorization: Bearer <token>`
+
+### Authentication Endpoints
+
+#### Google OAuth Login
+- **URL**: `/api/auth/google`
+- **Method**: `GET`
+- **Description**: Redirects to Google login page
+
+#### Google OAuth Callback
+- **URL**: `/api/auth/google/callback`
+- **Method**: `GET`
+- **Description**: Callback URL for Google OAuth. Redirects to frontend with JWT token.
+
+## Protected Endpoints
 
 ### Get All Prompts
 - **URL**: `/api/prompts`
 - **Method**: `GET`
-- **Query Parameters**: 
-  - `userId` (optional): Filter prompts by user ID
+- **Headers**: 
+  - `Authorization: Bearer <token>`
 - **Success Response**: 
   - **Code**: 200
   - **Content**: Array of prompt objects

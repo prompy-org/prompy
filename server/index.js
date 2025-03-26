@@ -3,20 +3,51 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import * as process from 'node:process';
+import session from 'express-session';
+import passport from './config/passport.js';
 import promptRoutes from './routes/promptRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import { verifyToken } from './middleware/auth.js';
 
 // Load environment variables
 dotenv.config();
+
+// Log environment variables (without exposing secrets)
+console.log('Server - Environment variables:');
+console.log('  PORT:', process.env.PORT || '5000 (default)');
+console.log('  FRONTEND_URL:', process.env.FRONTEND_URL || '* (default)');
+console.log('  SESSION_SECRET:', process.env.SESSION_SECRET ? 'Set' : 'Using default');
+console.log('  JWT_SECRET:', process.env.JWT_SECRET ? 'Set' : 'Using default');
+console.log('  MONGODB_URI:', process.env.MONGODB_URI || 'mongodb://localhost:27017/prompy (default)');
+console.log('  USE_TEST_DATA:', process.env.USE_TEST_DATA || 'false (default)');
+console.log('  GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
+console.log('  GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set');
+console.log('  CALLBACK_URL:', process.env.CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback (default)');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}));
 app.use(express.json());
 
+// Session setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'test-session-secret',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Routes
-app.use('/api/prompts', promptRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/prompts', verifyToken, promptRoutes); // Protected routes
 
 // Root route
 app.get('/', (req, res) => {

@@ -1,0 +1,96 @@
+import express from 'express';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import * as process from 'node:process';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const router = express.Router();
+
+// Google OAuth login route
+router.get('/google', (req, res) => {
+  // Store state and extension ID in session
+  req.session.oauthState = req.query.state;
+  req.session.extensionId = req.query.extension_id;
+  
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })(req, res);
+});
+
+// Google OAuth callback route
+router.get('/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login-failed', session: false }),
+  (req, res) => {
+    console.log('OAuth callback - User authenticated:', req.user.id);
+    
+    // Create JWT token
+    const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
+    const token = jwt.sign(
+      { 
+        id: req.user.id, 
+        email: req.user.email,
+        name: req.user.displayName
+      },
+      jwtSecret,
+      { expiresIn: '7d' }
+    );
+    
+    // Get extension ID from session
+    const extensionId = req.session.extensionId;
+    
+    // Redirect to a page that will communicate with the extension
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Authentication Success</title>
+      </head>
+      <body>
+        <h2>Authentication Successful</h2>
+        <p>Redirecting back to extension...</p>
+        <script>
+          // Send message to extension with the token
+          chrome.runtime.sendMessage("${extensionId}", 
+            { action: "auth_success", token: "${token}" },
+            function(response) {
+              if (chrome.runtime.lastError) {
+                document.body.innerHTML += '<p>Error: Could not communicate with extension. Please close this tab and try again.</p>';
+              } else {
+                document.body.innerHTML += '<p>Success! You can close this tab now.</p>';
+              }
+            }
+          );
+        </script>
+      </body>
+      </html>
+    `);
+  }
+);
+
+// Login failed route
+router.get('/login-failed', (req, res) => {
+  res.status(401).json({ message: 'Login failed' });
+});
+
+// Test login route (for development only)
+router.post('/test-login', (req, res) => {
+  console.log('Test login - Request received');
+  
+  // Create JWT token with test user
+  const token = jwt.sign(
+    { 
+      id: 'test-user-1', 
+      email: 'test@example.com',
+      name: 'Test User'
+    },
+    process.env.JWT_SECRET || 'test-jwt-secret',
+    { expiresIn: '7d' }
+  );
+  
+  console.log('Test login - Token created');
+  res.status(200).json({ token });
+});
+
+export default router;

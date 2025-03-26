@@ -32,16 +32,23 @@ const useTestData = process.env.USE_TEST_DATA === 'true';
 // GET all prompts for a user
 export const getPrompts = async (req, res) => {
   try {
-    // In a real app, you'd get the userId from auth middleware
-    const userId = req.query.userId || 'test-user-1';
+    // Get userId from authenticated user
+    const userId = req.user.id;
+    console.log('getPrompts - User ID:', userId);
     
     if (useTestData) {
-      return res.status(200).json(testPrompts.filter(p => p.userId === userId));
+      console.log('getPrompts - Using test data');
+      const filteredPrompts = testPrompts.filter(p => p.userId === userId);
+      console.log('getPrompts - Found prompts:', filteredPrompts.length);
+      return res.status(200).json(filteredPrompts);
     }
     
+    console.log('getPrompts - Using database');
     const prompts = await Prompt.find({ userId }).sort({ updatedAt: -1 });
+    console.log('getPrompts - Found prompts:', prompts.length);
     res.status(200).json(prompts);
   } catch (error) {
+    console.error('getPrompts - Error:', error.message);
     res.status(500).json({ message: 'Error fetching prompts', error: error.message });
   }
 };
@@ -70,8 +77,8 @@ export const getPromptById = async (req, res) => {
 export const createPrompt = async (req, res) => {
   try {
     const { title, content, tags } = req.body;
-    // In a real app, you'd get the userId from auth middleware
-    const userId = req.body.userId || 'test-user-1';
+    // Get userId from authenticated user
+    const userId = req.user.id;
     
     if (useTestData) {
       const newPrompt = {

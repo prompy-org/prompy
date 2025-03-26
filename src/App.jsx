@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PromptList from './components/PromptList';
 import PromptForm from './components/PromptForm';
+import Login from './components/Login';
 import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
+import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
 import './App.css';
 
 function App() {
@@ -10,6 +12,24 @@ function App() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check authentication status on load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authenticated = await isAuthenticatedService();
+        setIsAuthenticated(authenticated);
+      } catch (err) {
+        console.error('Error checking authentication:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   const loadPrompts = async () => {
     setIsLoading(true);
@@ -25,9 +45,12 @@ function App() {
     }
   };
 
+  // Load prompts when authenticated
   useEffect(() => {
-    loadPrompts();
-  }, []);
+    if (isAuthenticated && !isCheckingAuth) {
+      loadPrompts();
+    }
+  }, [isAuthenticated, isCheckingAuth]);
 
   const handleEdit = (prompt) => {
     setCurrentPrompt(prompt);
@@ -35,17 +58,15 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this prompt?')) {
-      setIsLoading(true);
-      try {
-        await deletePrompt(id);
-        await loadPrompts();
-      } catch (err) {
-        setError('Failed to delete prompt. Please try again.');
-        console.error('Error deleting prompt: ',err)
-      } finally {
-        setIsLoading(false);
-      }
+    setIsLoading(true);
+    try {
+      await deletePrompt(id);
+      await loadPrompts();
+    } catch (err) {
+      setError('Failed to delete prompt. Please try again.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,11 +85,33 @@ function App() {
       setIsFormVisible(false);
     } catch (err) {
       setError('Failed to save prompt. Please try again.');
-      console.error('Error saving prompt: ',err)
+      console.error('Error saving prompt: ', err);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsAuthenticated(false);
+      setPrompts([]);
+    } catch (err) {
+      console.error('Error logging out:', err);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  if (isCheckingAuth) {
+    return <div className="loading">Checking authentication...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="app">
@@ -91,6 +134,12 @@ function App() {
             className="new-button"
           >
             New Prompt
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="logout-button"
+          >
+            Logout
           </button>
         </div>
       </header>

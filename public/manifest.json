@@ -5,10 +5,12 @@
   "description": "Securely store and manage your prompts",
   "permissions": [
     "storage",
-    "identity"
+    "identity",
+    "webNavigation"
   ],
   "host_permissions": [
-    "https://prompy.mkhismkh.com/api/*"
+    "https://prompy.mkhismkh.com/api/*",
+    "http://localhost:5000/api/*"
   ],
   "action": {
     "default_popup": "index.html",
@@ -27,5 +29,8 @@
   "background": {
     "service_worker": "background.js",
     "type": "module"
+  },
+  "externally_connectable": {
+    "matches": ["https://prompy.mkhismkh.com/*", "http://localhost:5000/*"]
   }
 }

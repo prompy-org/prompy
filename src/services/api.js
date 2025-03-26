@@ -1,8 +1,19 @@
+
+import { getAuthToken } from './auth';
+
 const API_URL = 'http://localhost:5000/api';
 
 export const fetchPrompts = async () => {
   try {
-    const response = await fetch(`${API_URL}/prompts?userId=test-user-1`);
+    const token = await getAuthToken();
+    if (!token) throw new Error('Not authenticated');
+    
+    const response = await fetch(`${API_URL}/prompts`, {
+      headers: { 
+        'Authorization': `Bearer ${token}` 
+      }
+    });
+    
     if (!response.ok) throw new Error('Failed to fetch prompts');
     return await response.json();
   } catch (error) {
@@ -13,11 +24,18 @@ export const fetchPrompts = async () => {
 
 export const createPrompt = async (promptData) => {
   try {
+    const token = await getAuthToken();
+    if (!token) throw new Error('Not authenticated');
+    
     const response = await fetch(`${API_URL}/prompts`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...promptData, userId: 'test-user-1' }),
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(promptData),
     });
+    
     if (!response.ok) throw new Error('Failed to create prompt');
     return await response.json();
   } catch (error) {
@@ -28,11 +46,18 @@ export const createPrompt = async (promptData) => {
 
 export const updatePrompt = async (id, promptData) => {
   try {
+    const token = await getAuthToken();
+    if (!token) throw new Error('Not authenticated');
+    
     const response = await fetch(`${API_URL}/prompts/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(promptData),
     });
+    
     if (!response.ok) throw new Error('Failed to update prompt');
     return await response.json();
   } catch (error) {
@@ -43,9 +68,16 @@ export const updatePrompt = async (id, promptData) => {
 
 export const deletePrompt = async (id) => {
   try {
+    const token = await getAuthToken();
+    if (!token) throw new Error('Not authenticated');
+    
     const response = await fetch(`${API_URL}/prompts/${id}`, {
       method: 'DELETE',
+      headers: { 
+        'Authorization': `Bearer ${token}`
+      }
     });
+    
     if (!response.ok) throw new Error('Failed to delete prompt');
     return await response.json();
   } catch (error) {

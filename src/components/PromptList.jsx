@@ -1,23 +1,35 @@
 import React from 'react';
+import { FiEdit, FiTrash2, FiEye, FiCopy } from 'react-icons/fi';
+import { Tooltip } from 'react-tooltip';
 
-const PromptList = ({ prompts, onEdit, onDelete, isLoading, lastFetchTime }) => {
+const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTime }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
-
-  const getLastFetchInfo = () => {
-    if (!lastFetchTime) return '';
-    const date = new Date(lastFetchTime);
-    return `Last updated: ${date.toLocaleTimeString()}`;
+  
+  const handleCopy = (content, e) => {
+    e.stopPropagation(); // Prevent triggering the view action
+    navigator.clipboard.writeText(content);
+    
+    // Show temporary success message on the button
+    const button = e.currentTarget;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span>Copied!</span>';
+    setTimeout(() => {
+      button.innerHTML = originalText;
+    }, 2000);
   };
 
   return (
     <div className="prompt-list">
-      <div className="prompt-list-header">
-        <h2>Your Prompts</h2>
-        <span className="last-fetch-info">{getLastFetchInfo()}</span>
-      </div>
+      <h2>Your Prompts</h2>
+      
+      {lastFetchTime && (
+        <div className="last-sync">
+          Last synced: {formatDate(lastFetchTime)}
+        </div>
+      )}
       
       {isLoading ? (
         <div className="loading">Loading prompts...</div>
@@ -26,9 +38,9 @@ const PromptList = ({ prompts, onEdit, onDelete, isLoading, lastFetchTime }) => 
       ) : (
         <ul>
           {prompts.map(prompt => (
-            <li key={prompt._id} className="prompt-item">
+            <li key={prompt._id} className="prompt-item" onClick={() => onView(prompt)}>
               <div className="prompt-header">
-                <h3>{prompt.title}</h3>
+                <h3 className="prompt-title">{prompt.title}</h3>
                 <div className="prompt-meta">
                   <span className="prompt-date">
                     Updated: {formatDate(prompt.updatedAt)}
@@ -48,19 +60,53 @@ const PromptList = ({ prompts, onEdit, onDelete, isLoading, lastFetchTime }) => 
                 </div>
               )}
               <div className="prompt-actions">
-                <button onClick={() => onEdit(prompt)} className="edit-button">
-                  Edit
-                </button>
                 <button 
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(prompt);
+                  }} 
+                  className="icon-button edit-button"
+                  data-tooltip-id={`edit-tooltip-${prompt._id}`}
+                  data-tooltip-content="Edit prompt"
+                >
+                  <FiEdit />
+                </button>
+                <Tooltip id={`edit-tooltip-${prompt._id}`} />
+                
+                <button 
+                  onClick={(e) => handleCopy(prompt.content, e)} 
+                  className="icon-button copy-button"
+                  data-tooltip-id={`copy-tooltip-${prompt._id}`}
+                  data-tooltip-content="Copy to clipboard"
+                >
+                  <FiCopy />
+                </button>
+                <Tooltip id={`copy-tooltip-${prompt._id}`} />
+                
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (window.confirm('Are you sure you want to delete this prompt?')) {
                       onDelete(prompt._id);
                     }
                   }} 
-                  className="delete-button"
+                  className="icon-button delete-button"
+                  data-tooltip-id={`delete-tooltip-${prompt._id}`}
+                  data-tooltip-content="Delete prompt"
                 >
-                  Delete
+                  <FiTrash2 />
                 </button>
+                <Tooltip id={`delete-tooltip-${prompt._id}`} />
+                
+                <button 
+                  onClick={() => onView(prompt)} 
+                  className="icon-button view-button"
+                  data-tooltip-id={`view-tooltip-${prompt._id}`}
+                  data-tooltip-content="View full prompt"
+                >
+                  <FiEye />
+                </button>
+                <Tooltip id={`view-tooltip-${prompt._id}`} />
               </div>
             </li>
           ))}

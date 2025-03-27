@@ -37,7 +37,7 @@ export const clearCachedPrompts = async () => {
 export const getSyncFrequency = async () => {
   return new Promise((resolve) => {
     chrome.storage.sync.get(['syncFrequency'], (result) => {
-      resolve(result.syncFrequency || 15); // Default to 15 minutes
+      resolve(result.syncFrequency || 1000); // Default to 1000 minutes
     });
   });
 };

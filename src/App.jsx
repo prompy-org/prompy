@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import PromptList from './components/PromptList';
 import PromptForm from './components/PromptForm';
+import PromptView from './components/PromptView';
 import Login from './components/Login';
 import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
 import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
 import { clearCachedPrompts, getCachedPrompts, getSyncFrequency } from './services/storageService';
+import { FiRefreshCw, FiPlus, FiLogOut } from 'react-icons/fi';
+import { Tooltip } from 'react-tooltip';
 import './App.css';
 
 function App() {
   const [prompts, setPrompts] = useState([]);
   const [currentPrompt, setCurrentPrompt] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isPromptViewVisible, setIsPromptViewVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -138,8 +142,14 @@ function App() {
     setIsAuthenticated(true);
   };
 
+  const handleView = (prompt) => {
+    setCurrentPrompt(prompt);
+    setIsPromptViewVisible(true);
+    setIsFormVisible(false);
+  };
+
   if (isCheckingAuth) {
-    return <div className="loading">Checking authentication...</div>;
+    return <div className="loading-container"><div className="loading">Checking authentication...</div></div>;
   }
 
   if (!isAuthenticated) {
@@ -155,26 +165,38 @@ function App() {
             <button 
               onClick={handleRefresh} 
               disabled={isRefreshing || isLoading}
-              className="refresh-button"
+              className="icon-button refresh-button"
+              data-tooltip-id="refresh-tooltip"
+              data-tooltip-content="Refresh prompts"
             >
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              <FiRefreshCw className={isRefreshing ? "icon-spin" : ""} />
             </button>
+            <Tooltip id="refresh-tooltip" />
+            
             <button 
               onClick={() => {
                 setCurrentPrompt(null);
                 setIsFormVisible(true);
+                setIsPromptViewVisible(false);
               }}
               disabled={isLoading}
-              className="new-button"
+              className="icon-button new-button"
+              data-tooltip-id="new-tooltip"
+              data-tooltip-content="Create new prompt"
             >
-              New Prompt
+              <FiPlus />
             </button>
+            <Tooltip id="new-tooltip" />
+            
             <button 
               onClick={handleLogout}
-              className="logout-button"
+              className="icon-button logout-button"
+              data-tooltip-id="logout-tooltip"
+              data-tooltip-content="Log out"
             >
-              Logout
+              <FiLogOut />
             </button>
+            <Tooltip id="logout-tooltip" />
           </div>
         )}
       </header>
@@ -192,10 +214,23 @@ function App() {
             }} 
             isLoading={isLoading}
           />
+        ) : isPromptViewVisible ? (
+          <PromptView
+            prompt={currentPrompt}
+            onBack={() => {
+              setIsPromptViewVisible(false);
+              setCurrentPrompt(null);
+            }}
+            onEdit={() => {
+              setIsFormVisible(true);
+              setIsPromptViewVisible(false);
+            }}
+          />
         ) : (
           <PromptList 
             prompts={prompts} 
-            onEdit={handleEdit} 
+            onEdit={handleEdit}
+            onView={handleView}
             onDelete={handleDelete} 
             isLoading={isLoading}
             lastFetchTime={lastFetchTime}

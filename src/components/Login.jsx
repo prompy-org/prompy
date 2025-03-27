@@ -1,11 +1,21 @@
 /* eslint-disable no-undef */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { testLogin } from '../services/auth';
 import './Login.css';
 
 function Login({ onLoginSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [apiUrl, setApiUrl] = useState('');
+
+  // Load API URL from storage when component mounts
+  useEffect(() => {
+    chrome.storage.sync.get(['apiUrl'], (result) => {
+      if (result.apiUrl) {
+        setApiUrl(result.apiUrl);
+      }
+    });
+  }, []);
 
   const handleTestLogin = async () => {
     setIsLoading(true);
@@ -22,19 +32,14 @@ function Login({ onLoginSuccess }) {
   };
 
   const handleGoogleLogin = () => {
-    // Get the API URL from storage
-    chrome.storage.sync.get(['apiUrl'], (result) => {
-      const apiUrl = result.apiUrl || 'http://localhost:5000/api';
-      
-      // Generate a random state value for security
-      const state = Math.random().toString(36).substring(2, 15);
-      
-      // Store state temporarily for verification
-      chrome.storage.local.set({ oauthState: state }, () => {
-        // Open auth window
-        chrome.tabs.create({
-          url: `${apiUrl}/auth/google?state=${state}&extension_id=${chrome.runtime.id}`
-        });
+    // Generate a random state value for security
+    const state = Math.random().toString(36).substring(2, 15);
+    
+    // Store state temporarily for verification
+    chrome.storage.local.set({ oauthState: state }, () => {
+      // Open auth window using the stored apiUrl
+      chrome.tabs.create({
+        url: `${apiUrl}/auth/google?state=${state}&extension_id=${chrome.runtime.id}`
       });
     });
   };

@@ -4,6 +4,7 @@ import PromptForm from './components/PromptForm';
 import Login from './components/Login';
 import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
 import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
+import { clearCachedPrompts, getCachedPrompts, getSyncFrequency } from './services/storageService';
 import './App.css';
 
 function App() {
@@ -14,6 +15,8 @@ function App() {
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState(null);
 
   // Check authentication status on load
   useEffect(() => {
@@ -31,17 +34,41 @@ function App() {
     checkAuth();
   }, []);
 
-  const loadPrompts = async () => {
+  const loadPrompts = async (forceRefresh = false) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchPrompts();
-      setPrompts(data);
+      const { prompts, lastFetchTime } = await getCachedPrompts();
+      
+      // If we have cached prompts and aren't forcing a refresh, use them
+      if (prompts.length > 0 && !forceRefresh) {
+        setPrompts(prompts);
+        setLastFetchTime(lastFetchTime);
+        
+        // Check if we need to refresh based on sync frequency
+        const syncFrequency = await getSyncFrequency();
+        const cacheAge = Date.now() - lastFetchTime;
+        const cacheMaxAge = syncFrequency * 60 * 1000;
+        
+        if (cacheAge >= cacheMaxAge) {
+          // Refresh in background if cache is stale
+          fetchPrompts(true).then(freshPrompts => {
+            setPrompts(freshPrompts);
+            setLastFetchTime(Date.now());
+          }).catch(console.error);
+        }
+      } else {
+        // Fetch fresh data
+        const data = await fetchPrompts(forceRefresh);
+        setPrompts(data);
+        setLastFetchTime(Date.now());
+      }
     } catch (err) {
       setError('Failed to load prompts. Please try again.');
       console.error(err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -52,6 +79,11 @@ function App() {
     }
   }, [isAuthenticated, isCheckingAuth]);
 
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    loadPrompts(true);
+  };
+
   const handleEdit = (prompt) => {
     setCurrentPrompt(prompt);
     setIsFormVisible(true);
@@ -61,7 +93,7 @@ function App() {
     setIsLoading(true);
     try {
       await deletePrompt(id);
-      await loadPrompts();
+      await loadPrompts(true); // Force refresh after delete
     } catch (err) {
       setError('Failed to delete prompt. Please try again.');
       console.error(err);
@@ -80,7 +112,7 @@ function App() {
         // Create new prompt
         await createPrompt(promptData);
       }
-      await loadPrompts();
+      await loadPrompts(true); // Force refresh after save
       setCurrentPrompt(null);
       setIsFormVisible(false);
     } catch (err) {
@@ -94,6 +126,7 @@ function App() {
   const handleLogout = async () => {
     try {
       await logout();
+      await clearCachedPrompts(); // Clear cache on logout
       setIsAuthenticated(false);
       setPrompts([]);
     } catch (err) {
@@ -117,31 +150,33 @@ function App() {
     <div className="app">
       <header>
         <h1>Prompy</h1>
-        <div className="header-actions">
-          <button 
-            onClick={loadPrompts} 
-            disabled={isLoading}
-            className="refresh-button"
-          >
-            {isLoading ? 'Loading...' : 'Refresh'}
-          </button>
-          <button 
-            onClick={() => {
-              setCurrentPrompt(null);
-              setIsFormVisible(true);
-            }}
-            disabled={isLoading}
-            className="new-button"
-          >
-            New Prompt
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="logout-button"
-          >
-            Logout
-          </button>
-        </div>
+        {isAuthenticated && (
+          <div className="header-actions">
+            <button 
+              onClick={handleRefresh} 
+              disabled={isRefreshing || isLoading}
+              className="refresh-button"
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <button 
+              onClick={() => {
+                setCurrentPrompt(null);
+                setIsFormVisible(true);
+              }}
+              disabled={isLoading}
+              className="new-button"
+            >
+              New Prompt
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="logout-button"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </header>
       
       {error && <div className="error-message">{error}</div>}
@@ -163,6 +198,7 @@ function App() {
             onEdit={handleEdit} 
             onDelete={handleDelete} 
             isLoading={isLoading}
+            lastFetchTime={lastFetchTime}
           />
         )}
       </main>

@@ -10,6 +10,7 @@
   ],
   "host_permissions": [
     "https://prompy.mkhismkh.com/api/*",
+    "https://prompy.onrender.com/api/*",
     "http://localhost:5000/api/*"
   ],
   "action": {
@@ -31,6 +32,10 @@
     "type": "module"
   },
   "externally_connectable": {
-    "matches": ["https://prompy.mkhismkh.com/*", "http://localhost:5000/*"]
+    "matches": [
+      "https://prompy.mkhismkh.com/*", 
+      "https://prompy.onrender.com/*", 
+      "http://localhost:5000/*"
+    ]
   }
 }

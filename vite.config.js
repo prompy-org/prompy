@@ -23,5 +23,10 @@ export default defineConfig({
   server: {
     port: 3000
   },
-  publicDir: 'public'
+  publicDir: 'public',
+  define: {
+    // Make env variables available to the client
+    // eslint-disable-next-line no-undef
+    'process.env.API_URL': JSON.stringify(process.env.VITE_API_URL)
+  }
 })

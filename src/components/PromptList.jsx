@@ -1,14 +1,24 @@
 import React from 'react';
 
-const PromptList = ({ prompts, onEdit, onDelete, isLoading }) => {
+const PromptList = ({ prompts, onEdit, onDelete, isLoading, lastFetchTime }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
+  const getLastFetchInfo = () => {
+    if (!lastFetchTime) return '';
+    const date = new Date(lastFetchTime);
+    return `Last updated: ${date.toLocaleTimeString()}`;
+  };
+
   return (
     <div className="prompt-list">
-      <h2>Your Prompts</h2>
+      <div className="prompt-list-header">
+        <h2>Your Prompts</h2>
+        <span className="last-fetch-info">{getLastFetchInfo()}</span>
+      </div>
+      
       {isLoading ? (
         <div className="loading">Loading prompts...</div>
       ) : prompts.length === 0 ? (
@@ -38,16 +48,15 @@ const PromptList = ({ prompts, onEdit, onDelete, isLoading }) => {
                 </div>
               )}
               <div className="prompt-actions">
-                <button 
-                  onClick={() => onEdit(prompt)}
-                  disabled={isLoading}
-                  className="edit-button"
-                >
+                <button onClick={() => onEdit(prompt)} className="edit-button">
                   Edit
                 </button>
                 <button 
-                  onClick={() => onDelete(prompt._id)}
-                  disabled={isLoading}
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this prompt?')) {
+                      onDelete(prompt._id);
+                    }
+                  }} 
                   className="delete-button"
                 >
                   Delete

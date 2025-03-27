@@ -26,10 +26,20 @@ const removeToken = async () => {
   });
 };
 
+// Get API URL from storage
+const getApiUrl = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(['apiUrl'], (result) => {
+      resolve(result.apiUrl);
+    });
+  });
+};
+
 // Login with test credentials (for development)
 export const testLogin = async () => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/test-login', {
+    const apiUrl = await getApiUrl();
+    const response = await fetch(`${apiUrl}/auth/test-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });

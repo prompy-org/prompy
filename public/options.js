@@ -1,7 +1,8 @@
+/* eslint-disable no-undef */
 document.addEventListener('DOMContentLoaded', () => {
   // Load saved options
   chrome.storage.sync.get({
-    apiUrl: 'https://api.prompy.app',
+    apiUrl: 'https://prompy.onrender.com/api',
     theme: 'system',
     syncFrequency: 15
   }, (items) => {

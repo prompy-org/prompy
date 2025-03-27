@@ -4,18 +4,12 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('Prompy extension installed');
   
   // Set default options
-  chrome.storage.sync.get({
-    apiUrl: 'http://localhost:5000/api',
+  chrome.storage.sync.set({
+    apiUrl: 'https://prompy.onrender.com/api',
     theme: 'system',
     syncFrequency: 15
-  }, (items) => {
-    if (!items.apiUrl) {
-      chrome.storage.sync.set({
-        apiUrl: 'http://localhost:5000/api',
-        theme: 'system',
-        syncFrequency: 15
-      });
-    }
+  }, () => {
+    console.log('Default settings initialized');
   });
 });
 

@@ -97,16 +97,6 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
                   <FiTrash2 />
                 </button>
                 <Tooltip id={`delete-tooltip-${prompt._id}`} />
-                
-                <button 
-                  onClick={() => onView(prompt)} 
-                  className="icon-button view-button"
-                  data-tooltip-id={`view-tooltip-${prompt._id}`}
-                  data-tooltip-content="View full prompt"
-                >
-                  <FiEye />
-                </button>
-                <Tooltip id={`view-tooltip-${prompt._id}`} />
               </div>
             </li>
           ))}

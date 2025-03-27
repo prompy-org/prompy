@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
 import PromptList from './components/PromptList';
 import PromptForm from './components/PromptForm';
@@ -6,7 +7,7 @@ import Login from './components/Login';
 import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
 import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
 import { clearCachedPrompts, getCachedPrompts, getSyncFrequency } from './services/storageService';
-import { FiRefreshCw, FiPlus, FiLogOut } from 'react-icons/fi';
+import { FiRefreshCw, FiPlus, FiLogOut, FiExternalLink } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip';
 import './App.css';
 
@@ -148,6 +149,21 @@ function App() {
     setIsFormVisible(false);
   };
 
+  const handlePopOut = () => {
+    if (chrome && chrome.windows) {
+      chrome.windows.create({
+        url: chrome.runtime.getURL('index.html?popout=true'),
+        type: 'popup',
+        width: 1200,
+        height: 900
+      });
+      // Close the popup if this is not already a popout
+      if (!window.location.href.includes('popout=true')) {
+        window.close();
+      }
+    }
+  };
+
   if (isCheckingAuth) {
     return <div className="loading-container"><div className="loading">Checking authentication...</div></div>;
   }
@@ -187,6 +203,16 @@ function App() {
               <FiPlus />
             </button>
             <Tooltip id="new-tooltip" />
+            
+            <button 
+              onClick={handlePopOut}
+              className="icon-button popout-button"
+              data-tooltip-id="popout-tooltip"
+              data-tooltip-content="Open in separate window"
+            >
+              <FiExternalLink />
+            </button>
+            <Tooltip id="popout-tooltip" />
             
             <button 
               onClick={handleLogout}

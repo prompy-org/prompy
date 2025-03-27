@@ -79,3 +79,18 @@ chrome.runtime.onMessageExternal.addListener(
     }
   }
 );
+
+// Add listener for popout messages
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'popout') {
+    chrome.windows.create({
+      url: chrome.runtime.getURL('index.html?popout=true'),
+      type: 'popup',
+      width: 1200,
+      height: 900
+    }, (window) => {
+      sendResponse({ success: true, windowId: window.id });
+    });
+    return true; // Required for async sendResponse
+  }
+});

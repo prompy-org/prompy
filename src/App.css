@@ -16,6 +16,11 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
 }
 
 /* Prompt list styles */
@@ -228,6 +233,10 @@ body {
   line-height: 1.5;
 }
 
+.last-sync {
+  margin-bottom: 5px;
+}
+
 .copy-button {
   background-color: var(--primary-color);
   color: white;
@@ -238,7 +247,6 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
   font-weight: 500;
 }
 
@@ -331,9 +339,15 @@ body {
 
 /* App container */
 .app {
-  width: 553px;
+  min-width: 553px;
   margin: 0 auto;
   padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 header {
@@ -373,6 +387,31 @@ header h1 {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Add styles for the popout button */
+.popout-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.popout-button:hover {
+  background-color: var(--border-color);
+}
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-primary);
+}
+
+/* Ensure the app looks good at different sizes */
+@media (min-width: 768px) {
+  .app {
+    min-width: 500px;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .prompt-header {
@@ -403,4 +442,37 @@ header h1 {
   .variable-input-group textarea {
     width: 100%;
   }
+}
+
+/* Remove any potential scrolling from prompt-list */
+.prompt-list {
+  overflow: visible;
+}
+
+/* Custom scrollbar styling for Webkit browsers (Chrome, Safari, etc.) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Ensure content doesn't create horizontal scrollbars */
+.prompt-item, 
+.prompt-view-content, 
+.prompt-form {
+  max-width: 100%;
+  box-sizing: border-box;
 }

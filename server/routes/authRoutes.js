@@ -3,25 +3,32 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
 import dotenv from 'dotenv';
+import { createGoogleStrategy } from '../config/passport.js';
 
 dotenv.config();
 
 const router = express.Router();
 
 // Google OAuth login route
-router.get('/google', (req, res) => {
+router.get('/google', (req, res, next) => {
   // Store state and extension ID in session
   req.session.oauthState = req.query.state;
   req.session.extensionId = req.query.extension_id;
   
-  passport.authenticate('google', {
+  // Use the dynamic strategy
+  passport.authenticate(createGoogleStrategy(req), {
     scope: ['profile', 'email']
-  })(req, res);
+  })(req, res, next);
 });
 
 // Google OAuth callback route
 router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login-failed', session: false }),
+  (req, res, next) => {
+    passport.authenticate(createGoogleStrategy(req), { 
+      failureRedirect: '/login-failed', 
+      session: false 
+    })(req, res, next);
+  },
   (req, res) => {
     console.log('OAuth callback - User authenticated:', req.user.id);
     

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FiCopy, FiArrowLeft, FiEdit } from 'react-icons/fi';
+import { FiCopy, FiArrowLeft, FiEdit, FiEye } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip';
 
 const PromptView = ({ prompt, onBack, onEdit }) => {
   const [processedContent, setProcessedContent] = useState(prompt.content);
   const [variables, setVariables] = useState({});
   const [copySuccess, setCopySuccess] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
   
   // Extract variables from the prompt content
   useEffect(() => {
@@ -14,27 +15,35 @@ const PromptView = ({ prompt, onBack, onEdit }) => {
     
     const extractedVars = {};
     matches.forEach(match => {
-      extractedVars[match[1]] = ''; // Initialize with empty string
+      extractedVars[match[1]] = `${match[1]}`; // Initialize with variable name
     });
     
     setVariables(extractedVars);
   }, [prompt.content]);
   
-  // Update processed content when variables change
-  useEffect(() => {
+  // Update processed content only when preview is requested
+  const updateProcessedContent = () => {
     let content = prompt.content;
     Object.entries(variables).forEach(([key, value]) => {
       const regex = new RegExp(`\\$\\{\\{${key}\\}\\}`, 'g');
       content = content.replace(regex, value);
     });
     setProcessedContent(content);
-  }, [variables, prompt.content]);
+    setPreviewMode(true);
+  };
   
   const handleVariableChange = (varName, value) => {
     setVariables(prev => ({
       ...prev,
       [varName]: value
     }));
+  };
+  
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      updateProcessedContent();
+    }
   };
   
   const handleCopy = () => {
@@ -97,16 +106,26 @@ const PromptView = ({ prompt, onBack, onEdit }) => {
                   id={`var-${varName}`}
                   value={value}
                   onChange={(e) => handleVariableChange(varName, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e)}
                   placeholder={`Enter value for ${varName}`}
                   rows={3}
                 />
               </div>
             ))}
+            <button 
+              onClick={updateProcessedContent}
+              className="preview-button"
+              data-tooltip-id="preview-tooltip"
+              data-tooltip-content="Preview with variables"
+            >
+              <FiEye />
+            </button>
+            <Tooltip id="preview-tooltip" />
           </div>
         )}
         
         <div className="prompt-content-box">
-          <pre>{processedContent}</pre>
+          <pre>{previewMode ? processedContent : prompt.content}</pre>
         </div>
         
         <button 

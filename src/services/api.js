@@ -3,7 +3,7 @@ import { getAuthToken } from './auth';
 import { getCachedPrompts, storePrompts, getSyncFrequency } from './storageService';
 
 // Use environment variable with fallback
-const API_URL = import.meta.env.VITE_API_URL || 'https://prompy.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const fetchPrompts = async (forceRefresh = false) => {
   try {

@@ -34,7 +34,6 @@ Prompy is a powerful Chrome extension that helps you securely store, organize, a
 ## 🔒 Privacy First
 
 Your prompts are valuable intellectual property. Prompy prioritizes your privacy with:
-- End-to-end encryption
 - Local storage options
 - No prompt data mining
 - Transparent data practices

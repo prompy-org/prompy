@@ -29,5 +29,14 @@ export default [
         { allowConstantExport: true },
       ],
     },
+    overrides: [
+      {
+        files: ["**/__tests__/**/*.js", "**/*.test.js"],
+        env: { jest: true },
+        rules: {
+          'no-console': 'off',
+        },
+      },
+    ],
   },
 ]

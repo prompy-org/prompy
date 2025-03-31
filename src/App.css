@@ -170,7 +170,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-group input,
 .form-group textarea {
-  width: 100%;
+  width: -webkit-fill-available;
   padding: 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -481,13 +481,6 @@ main {
   }
 }
 
-/* Adjust responsive styles for textarea */
-@media (max-width: 768px) {
-  .variable-input-group textarea {
-    width: 100%;
-  }
-}
-
 /* Remove any potential scrolling from prompt-list */
 .prompt-list {
   overflow: visible;
@@ -545,6 +538,7 @@ main {
 
 .search-icon {
   color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .search-input {
@@ -556,10 +550,14 @@ main {
   border: none;
 }
 
-.search-input:focus {
+.search-container:focus-within {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(74, 110, 224, 0.2);
+}
+
+.search-input:focus {
+  outline: none;
 }
 
 .clear-search {
@@ -739,4 +737,15 @@ main {
   border-radius: 4px;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  margin-right: 8px;
+}
+
+.logo-header {
+  display: flex;
+  align-items: center;
 }

@@ -133,11 +133,6 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
           <div className="tag-filters">
             <div className="tag-filters-header">
               <span>Filter by tags:</span>
-              {selectedTags.length > 0 && (
-                <button onClick={clearFilters} className="clear-filters">
-                  Clear filters
-                </button>
-              )}
             
               <div className="tag-search-container">
                 <FiSearch className="tag-search-icon" />
@@ -154,6 +149,12 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
                   </button>
                 )}
               </div>
+
+              {selectedTags.length > 0 && (
+                <button onClick={clearFilters} className="clear-filters">
+                  Clear filters
+                </button>
+              )}
             </div>
             
             <div 

@@ -199,7 +199,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>Prompy</h1>
+        <h1 className="logo-header"> <img src="/logo.png" className='logo' alt="Prompy logo" /> Prompy</h1>
         {isAuthenticated && (
           <div className="header-actions">
             <button 

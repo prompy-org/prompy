@@ -1,22 +1,43 @@
 :root {
-  --primary-color: #4a6ee0;
-  --primary-dark: #3a5bc7;
-  --bg-primary: #1e1e2e;
-  --bg-secondary: #2a2a3c;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --border-color: #3a3a4c;
+  --primary-color: #6200EA;
+  --primary-dark: #5000c7;
+  --bg-primary: #F5F7FA;
+  --bg-secondary: #FFFFFF;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
   --danger-color: #e53935;
-  --success-color: #43a047;
+  --success-color: #00BFA5;
+  --accent-color: #00ff15;
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+  --primary-color: #9D6EFF;
+  --primary-dark: #6200EA;
+  --bg-primary: #121212;
+  --bg-secondary: #1E1E1E;
+  --text-primary: #E0E0E0;
+  --text-secondary: #AAAAAA;
+  --border-color: #333333;
+  --danger-color: #FF5252;
+  --success-color: #00E5C7;
+  --accent-color: #00ff15;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
 }
 
 #root {
@@ -36,7 +57,7 @@ body {
   padding: 16px;
   margin-bottom: 16px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s ease, border-color 0.3s ease;
   border: 1px solid var(--border-color);
 }
 
@@ -78,11 +99,16 @@ body {
 }
 
 .tag {
-  background-color: rgba(74, 110, 224, 0.2);
+  background-color: rgba(98, 0, 234, 0.1);
   color: var(--primary-color);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] .tag {
+  background-color: rgba(157, 110, 255, 0.2);
 }
 
 .prompt-actions {
@@ -129,6 +155,7 @@ body {
   border-radius: 8px;
   max-width: 800px;
   margin: 0 auto;
+  transition: background-color 0.3s ease;
 }
 
 .form-group {
@@ -150,6 +177,7 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-size: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .form-group textarea {
@@ -238,7 +266,7 @@ body {
 }
 
 .copy-button {
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
   color: white;
   border: none;
   padding: 10px 16px;
@@ -251,7 +279,7 @@ body {
 }
 
 .copy-button:hover {
-  background-color: var(--primary-dark);
+  background-color: #e09c00;
 }
 
 .copy-success {
@@ -368,6 +396,18 @@ header h1 {
 .header-actions {
   display: flex;
   gap: 12px;
+}
+
+/* Add styles for the theme toggle button */
+.theme-toggle-button {
+  color: var(--text-primary);
+  background-color: transparent;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.theme-toggle-button:hover {
+  color: var(--primary-color);
+  background-color: rgba(98, 0, 234, 0.1);
 }
 
 /* Make buttons in a row */
@@ -675,7 +715,7 @@ main {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
   color: white;
   border: none;
   border-radius: 4px;
@@ -686,7 +726,7 @@ main {
 }
 
 .preview-button:hover {
-  background-color: var(--primary-color-dark);
+  background-color: #e09c00;
 }
 
 .preview-notice {

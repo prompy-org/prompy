@@ -7,7 +7,7 @@ import Login from './components/Login';
 import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
 import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
 import { clearCachedPrompts, getCachedPrompts, getSyncFrequency } from './services/storageService';
-import { FiRefreshCw, FiPlus, FiLogOut, FiExternalLink } from 'react-icons/fi';
+import { FiRefreshCw, FiPlus, FiLogOut, FiExternalLink, FiMoon, FiSun } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip';
 import './App.css';
 
@@ -22,6 +22,30 @@ function App() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Check if dark mode was previously enabled
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setDarkMode(true);
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }, []);
+
+  // Toggle dark mode
+  const toggleTheme = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    
+    if (newDarkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   // Check authentication status on load
   useEffect(() => {
@@ -178,6 +202,16 @@ function App() {
         <h1>Prompy</h1>
         {isAuthenticated && (
           <div className="header-actions">
+            <button 
+              onClick={toggleTheme} 
+              className="icon-button theme-toggle-button"
+              data-tooltip-id="theme-tooltip"
+              data-tooltip-content={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {darkMode ? <FiSun /> : <FiMoon />}
+            </button>
+            <Tooltip id="theme-tooltip" />
+            
             <button 
               onClick={handleRefresh} 
               disabled={isRefreshing || isLoading}

@@ -47,7 +47,7 @@ npm start
 
 ## API Documentation
 
-See [API_DOCS.md](./API_DOCS.md) for detailed API documentation.
+See [API_DOCS.md](../docs/API_DOCS.md) for detailed API documentation.
 
 ## Project Structure
 

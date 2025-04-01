@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function AuthCallback() {
+function AuthCallback() {
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('Verifying authentication...');
   const searchParams = useSearchParams();
@@ -103,4 +103,8 @@ export default function AuthCallback() {
       </div>
     </div>
   );
+}
+
+export default function Page () {
+  return <Suspense><AuthCallback /></Suspense>
 }

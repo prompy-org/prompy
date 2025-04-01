@@ -1,6 +1,6 @@
 # Prompy - Your AI Prompt Manager
 
-![Prompy Logo](public/icons/icon128.png)
+<img src="public/logo.png" alt="Prompy Logo" width="100" />
 
 Prompy is a powerful Chrome extension that helps you securely store, organize, and manage your AI prompts. Whether you're a prompt engineer, AI enthusiast, or just someone who frequently uses AI tools, Prompy makes your workflow smoother and more efficient.
 

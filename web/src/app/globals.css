@@ -56,3 +56,16 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+.google-icon {
+  background-color: white;
+  color: #4285F4;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-weight: bold;
+}

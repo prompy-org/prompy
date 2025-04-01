@@ -1,3 +1,4 @@
+import SubscriptionButton from "@/components/SubscriptionButton";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -117,14 +118,7 @@ export default function Home() {
                 <PricingItem dark>Advanced templates</PricingItem>
               </ul>
               
-              <Link 
-                href="https://prompy.org/signup"
-                className="mt-auto rounded-full bg-[#4c6ef5] hover:bg-[#3b5bdb] px-6 py-3 font-medium text-white text-center"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Start Free Trial
-              </Link>
+              <SubscriptionButton planId="unlimited" className="mt-auto rounded-full bg-[#4c6ef5] hover:bg-[#3b5bdb] text-foreground px-6 py-3 font-medium text-center" />
             </div>
           </div>
         </div>

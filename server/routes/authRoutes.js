@@ -76,6 +76,49 @@ router.get('/google/callback',
   }
 );
 
+// Add this route to handle web app authentication
+router.get('/google/web', (req, res, next) => {
+  // Store state and redirect URL in session
+  req.session.oauthState = req.query.state;
+  req.session.redirectUrl = req.query.redirect_url;
+  
+  // Use the dynamic strategy
+  passport.authenticate(createGoogleStrategy(req), {
+    scope: ['profile', 'email']
+  })(req, res, next);
+});
+
+// Add web callback route
+router.get('/google/web/callback', 
+  (req, res, next) => {
+    passport.authenticate(createGoogleStrategy(req), { 
+      failureRedirect: '/login-failed', 
+      session: false 
+    })(req, res, next);
+  },
+  (req, res) => {
+    console.log('Web OAuth callback - User authenticated:', req.user.id);
+    
+    // Create JWT token
+    const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
+    const token = jwt.sign(
+      { 
+        id: req.user.id, 
+        email: req.user.email,
+        name: req.user.displayName
+      },
+      jwtSecret,
+      { expiresIn: '7d' }
+    );
+    
+    // Get redirect URL from session
+    const redirectUrl = req.session.redirectUrl || process.env.FRONTEND_URL;
+    
+    // Redirect to the web app with the token
+    res.redirect(`${redirectUrl}?token=${token}&state=${req.session.oauthState}`);
+  }
+);
+
 // Login failed route
 router.get('/login-failed', (req, res) => {
   res.status(401).json({ message: 'Login failed' });

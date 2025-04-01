@@ -1,5 +1,19 @@
 import mongoose from 'mongoose';
 
+const subscriptionSchema = new mongoose.Schema({
+  isActive: {
+    type: Boolean,
+    default: false
+  },
+  planId: String,
+  startDate: Date,
+  endDate: Date,
+  subscriptionId: String,
+  orderId: String,
+  paymentId: String,
+  lastPaymentDate: Date
+});
+
 const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
@@ -18,6 +32,10 @@ const userSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
   avatar: String,
+  subscription: {
+    type: subscriptionSchema,
+    default: () => ({})
+  },
   createdAt: {
     type: Date,
     default: Date.now

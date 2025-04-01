@@ -7,14 +7,20 @@ import session from 'express-session';
 import passport from './config/passport.js';
 import promptRoutes from './routes/promptRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { verifyToken } from './middleware/auth.js';
 import { Cashfree } from "cashfree-pg"; 
 
-Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
-Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
-Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
 // Load environment variables
 dotenv.config();
+
+// Configure Cashfree
+Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
+Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
+Cashfree.XEnvironment = process.env.NODE_ENV === 'production' 
+  ? Cashfree.Environment.PRODUCTION 
+  : Cashfree.Environment.SANDBOX;
 
 // Log environment variables (without exposing secrets)
 console.log('Server - Environment variables:');
@@ -27,13 +33,16 @@ console.log('  USE_TEST_DATA:', process.env.USE_TEST_DATA || 'false (default)');
 console.log('  GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
 console.log('  GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set');
 console.log('  CALLBACK_URL:', process.env.CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback (default)');
+console.log('  CASHFREE_CLIENT_ID:', process.env.CASHFREE_CLIENT_ID ? 'Set' : 'Not set');
+console.log('  CASHFREE_SECRET_KEY:', process.env.CASHFREE_SECRET_KEY ? 'Set' : 'Not set');
+console.log('  SERVER_URL:', process.env.SERVER_URL || 'http://localhost:5000 (default)');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: '*',
   credentials: true
 }));
 app.use(express.json());
@@ -52,6 +61,8 @@ app.use(passport.session());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/prompts', verifyToken, promptRoutes); // Protected routes
+app.use('/api/subscription', subscriptionRoutes); // Subscription routes
+app.use('/api/user', userRoutes); // User routes
 
 // Root route
 app.get('/', (req, res) => {
@@ -70,28 +81,3 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/prompy')
     console.error('MongoDB connection error:', error);
   });
 
-// Cashfree integrations
-function createOrder() {
-  var request = {
-    "order_amount": "1",
-    "order_currency": "INR",
-    "customer_details": {
-      "customer_id": "node_sdk_test",
-      "customer_name": "",
-      "customer_email": "example@gmail.com",
-      "customer_phone": "9999999999"
-    },
-    "order_meta": {
-      "return_url": "https://test.cashfree.com/pgappsdemos/return.php?order_id=order_123"
-    },
-    "order_note": ""
-  }
-
-  Cashfree.PGCreateOrder("2023-08-01", request).then((response) => {
-    var a = response.data;
-    console.log(a)
-  })
-    .catch((error) => {
-      console.error('Error setting up order request:', error.response.data);
-    });
-}

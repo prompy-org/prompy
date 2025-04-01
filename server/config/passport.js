@@ -19,7 +19,15 @@ const createCallbackURL = (req) => {
   // Get host (e.g., localhost:5000 or your-domain.com)
   const host = req.headers['x-forwarded-host'] || req.get('host');
   
-  return `${protocol}://${host}${CALLBACK_PATH}`;
+  // Determine if this is a web authentication request
+  const isWebAuth = req.path.includes('/web');
+  
+  // Use the appropriate callback path based on the request type
+  const callbackPath = isWebAuth 
+    ? process.env.WEB_CALLBACK_PATH || '/api/auth/google/web/callback'
+    : CALLBACK_PATH;
+  
+  return `${protocol}://${host}${callbackPath}`;
 };
 
 console.log('Passport config - Google Client ID:', GOOGLE_CLIENT_ID ? 'ID present' : 'No ID');

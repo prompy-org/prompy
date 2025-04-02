@@ -30,7 +30,7 @@ router.get('/google/callback',
     })(req, res, next);
   },
   (req, res) => {
-    console.log('OAuth callback - User authenticated:', req.user.id);
+    // console.log('OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
     const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
@@ -97,7 +97,7 @@ router.get('/google/web/callback',
     })(req, res, next);
   },
   (req, res) => {
-    console.log('Web OAuth callback - User authenticated:', req.user.id);
+    // console.log('Web OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
     const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
@@ -126,7 +126,7 @@ router.get('/login-failed', (req, res) => {
 
 // Test login route (for development only)
 router.post('/test-login', (req, res) => {
-  console.log('Test login - Request received');
+  // console.log('Test login - Request received');
   
   // Create JWT token with test user
   const token = jwt.sign(
@@ -139,7 +139,7 @@ router.post('/test-login', (req, res) => {
     { expiresIn: '7d' }
   );
   
-  console.log('Test login - Token created');
+  // console.log('Test login - Token created');
   res.status(200).json({ token });
 });
 

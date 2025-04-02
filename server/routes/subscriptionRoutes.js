@@ -6,13 +6,17 @@ import {
   verifyPayment,
   getSubscriptionStatus
 } from '../controllers/subscriptionController.js';
+import { 
+  subscriptionLimiter, 
+  paymentVerificationLimiter 
+} from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
-// Protected routes (require authentication)
-router.post('/create-order', verifyToken, createSubscriptionOrder);
-router.get('/status', verifyToken, getSubscriptionStatus);
-router.get('/verify/:orderId', verifyToken, verifyPayment);
+// Protected routes with rate limiting
+router.post('/create-order', verifyToken, subscriptionLimiter, createSubscriptionOrder);
+router.get('/status', verifyToken, subscriptionLimiter, getSubscriptionStatus);
+router.get('/verify/:orderId', verifyToken, paymentVerificationLimiter, verifyPayment);
 
 // Webhook doesn't need authentication but should verify signature
 router.post('/webhook', handleWebhook);

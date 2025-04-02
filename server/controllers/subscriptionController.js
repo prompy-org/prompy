@@ -7,35 +7,92 @@ dotenv.config();
 
 // Constants for subscription plans
 const PLANS = {
-  UNLIMITED: {
-    id: 'unlimited',
-    name: 'Unlimited Plan',
-    amount: 353,
+  BASIC: {
+    id: 'basic',
+    name: 'Basic Plan',
+    amount: 0,
     currency: 'INR',
-    interval: 'monthly'
+    interval: null, // Free plan
+    promptLimit: 50
+  },
+  ADVANCED: {
+    id: 'advanced',
+    name: 'Advanced Plan',
+    amount: 999,
+    currency: 'INR',
+    interval: null, // One-time payment
+    promptLimit: 300
+  },
+  UNLIMITED_MONTHLY: {
+    id: 'unlimited_monthly',
+    name: 'Unlimited Monthly Plan',
+    amount: 499,
+    currency: 'INR',
+    interval: 'monthly',
+    promptLimit: Infinity,
+    durationMonths: 1
+  },
+  UNLIMITED_QUARTERLY: {
+    id: 'unlimited_quarterly',
+    name: 'Unlimited Quarterly Plan',
+    amount: 1299,
+    currency: 'INR',
+    interval: 'quarterly',
+    promptLimit: Infinity,
+    durationMonths: 3
+  },
+  UNLIMITED_YEARLY: {
+    id: 'unlimited_yearly',
+    name: 'Unlimited Yearly Plan',
+    amount: 4999,
+    currency: 'INR',
+    interval: 'yearly',
+    promptLimit: Infinity,
+    durationMonths: 12
   }
 };
 
-// Create a payment order
+// Create a payment order with improved security
 export const createSubscriptionOrder = async (req, res) => {
   try {
     const { planId } = req.body;
     const userId = req.user.id;
     
-    // Validate plan
-    if (!PLANS[planId.toUpperCase()]) {
+    // Input validation
+    if (!planId || typeof planId !== 'string') {
       return res.status(400).json({ message: 'Invalid plan selected' });
     }
     
-    const plan = PLANS[planId.toUpperCase()];
-    const user = await User.findById(userId);
+    // Validate plan with case-insensitive lookup
+    const planKey = Object.keys(PLANS).find(key => 
+      PLANS[key].id.toLowerCase() === planId.toLowerCase()
+    );
+    
+    if (!planKey) {
+      return res.status(400).json({ message: 'Invalid plan selected' });
+    }
+    
+    const plan = PLANS[planKey];
+    
+    // Free plan doesn't need payment processing
+    if (plan.amount === 0) {
+      return res.status(400).json({ message: 'Selected plan does not require payment' });
+    }
+    
+    // Find user with projection to limit returned fields
+    const user = await User.findById(userId, { 
+      displayName: 1, 
+      email: 1, 
+      subscription: 1 
+    });
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Generate a unique order ID
-    const orderId = `order_${Date.now()}_${userId.substring(0, 5)}`;
+    // Generate a unique order ID with more entropy
+    const randomString = crypto.randomBytes(8).toString('hex');
+    const orderId = `order_${Date.now()}_${randomString}`;
     
     // Create order request
     const orderRequest = {
@@ -56,14 +113,15 @@ export const createSubscriptionOrder = async (req, res) => {
     };
     
     // Create order with Cashfree
-    const response = await Cashfree.PGCreateOrder("2023-08-01", orderRequest);
+    const response = await Cashfree.PGCreateOrder("2025-01-01", orderRequest);
     
     if (response.data && response.data.payment_session_id) {
       // Store order information in user document
-      // Update subscription fields directly
+      user.subscription = user.subscription || {};
       user.subscription.orderId = orderId;
       user.subscription.planId = plan.id;
-      console.log("User:", user);
+      user.subscription.pendingUpgrade = true;
+      user.markModified('subscription');
       await user.save();
       
       // Return payment link to frontend
@@ -76,109 +134,203 @@ export const createSubscriptionOrder = async (req, res) => {
     }
   } catch (error) {
     console.error('Error creating subscription order:', error);
-    return res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Verify payment webhook
+// Verify payment webhook with improved security
 export const handleWebhook = async (req, res) => {
   try {
     const webhookData = req.body;
     const signature = req.headers["x-webhook-signature"];
+    const timestamp = req.headers["x-webhook-timestamp"];
     
-    // Verify webhook signature
-    const computedSignature = crypto
-      .createHmac("sha256", process.env.CASHFREE_SECRET_KEY)
-      .update(JSON.stringify(webhookData))
-      .digest("base64");
+    // Verify webhook signature - critical security check
+    if (!signature || !timestamp) {
+      console.error("Missing webhook signature or timestamp");
+      return res.status(400).json({ message: "Missing signature or timestamp" });
+    }
     
-    if (computedSignature !== signature) {
-      console.error("Invalid webhook signature");
+    try {
+      // Use Cashfree's official verification method
+      Cashfree.PGVerifyWebhookSignature(signature, JSON.stringify(webhookData), timestamp);
+    } catch (err) {
+      console.error("Invalid webhook signature:", err.message);
       return res.status(400).json({ message: "Invalid signature" });
     }
     
     // Process the webhook data
+    const { type } = webhookData;
     const { order_id, order, payment } = webhookData.data;
     
-    if (payment.payment_status === "SUCCESS") {
-      // Find user by order ID
-      const user = await User.findOne({ "subscription.orderId": order_id });
+    if (!order_id || !payment) {
+      console.error("Invalid webhook payload");
+      return res.status(400).json({ message: "Invalid payload" });
+    }
+    
+    // Only process payment success events
+    if (type === "PAYMENT_SUCCESS_WEBHOOK" && payment.payment_status === "SUCCESS") {
+      // Find user by order ID with projection to limit returned fields
+      const user = await User.findOne(
+        { "subscription.orderId": order_id },
+        { subscription: 1, email: 1, promptCount: 1 }
+      );
       
       if (!user) {
         console.error(`User not found for order ${order_id}`);
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Update subscription details
-      const now = new Date();
-      const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
+      // Get the plan details
+      const planKey = Object.keys(PLANS).find(key => 
+        PLANS[key].id === user.subscription.planId
+      );
       
-      user.subscription = {
-        isActive: true,
-        planId: user.subscription.planId,
-        startDate: now,
-        endDate: endDate,
-        subscriptionId: `sub_${order_id}`, // Generate subscription ID
-        orderId: order_id,
-        paymentId: payment.payment_id,
-        lastPaymentDate: now
-      };
+      if (!planKey) {
+        console.error(`Invalid plan ID: ${user.subscription.planId}`);
+        return res.status(400).json({ message: "Invalid plan" });
+      }
+      
+      const plan = PLANS[planKey];
+      
+      // Validate payment amount against expected amount
+      if (Number(payment.payment_amount) !== plan.amount) {
+        console.error(`Payment amount mismatch for order ${order_id}`);
+        // Log this suspicious activity but still proceed
+      }
+      
+      const now = new Date();
+      let endDate;
+      
+      // Handle subscription extension if already active
+      if (user.subscription.isActive && 
+          user.subscription.endDate && 
+          plan.interval) {
+        
+        // If current subscription is still active, extend from current end date
+        const currentEndDate = new Date(user.subscription.endDate);
+        if (currentEndDate > now) {
+          endDate = new Date(currentEndDate);
+        } else {
+          endDate = new Date(now);
+        }
+        
+        // Add months based on plan duration
+        endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+      } else {
+        // New subscription
+        endDate = new Date(now);
+        endDate.setMonth(endDate.getMonth() + (plan.durationMonths || 0));
+      }
+      
+      // Update subscription details
+      user.subscription.isActive = true;
+      user.subscription.startDate = now;
+      user.subscription.endDate = endDate;
+      user.subscription.subscriptionId = `sub_${order_id}`;
+      user.subscription.paymentId = payment.cf_payment_id;
+      user.subscription.lastPaymentDate = now;
+      user.subscription.planId = plan.id;
+      user.subscription.promptLimit = plan.promptLimit;
+      user.subscription.pendingUpgrade = false;
+      user.markModified('subscription');
       
       await user.save();
       console.log(`Subscription activated for user ${user._id}`);
     }
     
+    // Always return 200 to the payment provider
     return res.status(200).json({ message: "Webhook processed successfully" });
   } catch (error) {
     console.error('Error processing webhook:', error);
-    return res.status(500).json({ message: 'Server error', error: error.message });
+    // Still return 200 to prevent retries that might cause duplicate processing
+    return res.status(200).json({ message: 'Webhook received' });
   }
 };
 
-// Verify payment status
+// Verify payment status with improved security (fallback if webhook hasn't processed)
 export const verifyPayment = async (req, res) => {
   try {
     const { orderId } = req.params;
     const userId = req.user.id;
-    console.log("Verifying payment for User:", userId, req.user);
     
-    // Verify the user owns this order
+    // Input validation
+    if (!orderId || !orderId.match(/^order_[a-zA-Z0-9_]+$/)) {
+      return res.status(400).json({ message: 'Invalid order ID format' });
+    }
+    
+    // Verify the user owns this order with projection
     const user = await User.findOne({ 
       _id: userId,
       "subscription.orderId": orderId 
-    });
+    }, { subscription: 1 });
     
     if (!user) {
-      return res.status(403).json({ message: 'Unauthorized access to this order' });
+      // Use consistent error messages to prevent user enumeration
+      return res.status(403).json({ message: 'Unauthorized access' });
     }
     
-    // Get order details from Cashfree
-    const response = await Cashfree.PGFetchOrder("2023-08-01", orderId);
+    // If subscription is already active, webhook has processed successfully
+    if (user.subscription.isActive) {
+      return res.status(200).json({ 
+        success: true,
+        subscription: {
+          isActive: user.subscription.isActive,
+          planId: user.subscription.planId,
+          endDate: user.subscription.endDate
+        }
+      });
+    }
     
-    if (response.data && response.data.order_status === "PAID") {
+    // Fallback: Get order details from Cashfree
+    const response = await Cashfree.PGFetchOrder("2025-01-01", orderId);
+    
+    // Validate the response
+    if (!response || !response.data) {
+      return res.status(500).json({ message: 'Failed to verify payment status' });
+    }
+    
+    if (response.data.order_status === "PAID") {
       // If payment is successful but webhook hasn't processed yet
-      if (!user.subscription.isActive) {
-        const now = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 1);
-        console.log("Activating subscription for user:", response.data);
-        
-        user.subscription.isActive = true;
-        user.subscription.planId = user.subscription.planId;
-        user.subscription.startDate = now;
-        user.subscription.endDate = endDate;
-        user.subscription.subscriptionId = `sub_${orderId}`;
-        user.subscription.orderId = orderId;
-        user.subscription.paymentId = response.data.payment_session_id;
-        user.subscription.lastPaymentDate = now;
-        
-        await user.save();
+      const now = new Date();
+      
+      // Get the plan details
+      const plan = Object.values(PLANS).find(p => p.id === user.subscription.planId);
+      if (!plan) {
+        return res.status(400).json({ message: 'Invalid plan' });
       }
+      
+      // Validate payment amount against expected plan amount
+      if (Number(response.data.order_amount) !== plan.amount) {
+        console.error(`Payment amount mismatch for order ${orderId}`);
+        return res.status(403).json({ message: 'Payment validation failed' });
+      }
+      
+      // Calculate end date based on plan duration
+      const endDate = new Date(now);
+      endDate.setMonth(endDate.getMonth() + (plan.durationMonths || 0));
+      
+      // Update subscription details
+      user.subscription.isActive = true;
+      user.subscription.startDate = now;
+      user.subscription.endDate = endDate;
+      user.subscription.subscriptionId = `sub_${orderId}`;
+      user.subscription.paymentId = response.data.payment_session_id;
+      user.subscription.promptLimit = plan.promptLimit;
+      user.subscription.lastPaymentDate = now;
+      user.subscription.pendingUpgrade = false;
+      user.markModified('subscription');
+      
+      await user.save();
+      console.log(`Subscription activated for user ${user._id} via manual verification`);
       
       return res.status(200).json({ 
         success: true,
-        subscription: user.subscription
+        subscription: {
+          isActive: true,
+          planId: user.subscription.planId,
+          endDate: endDate
+        }
       });
     } else {
       return res.status(200).json({ 
@@ -188,7 +340,7 @@ export const verifyPayment = async (req, res) => {
     }
   } catch (error) {
     console.error('Error verifying payment:', error);
-    return res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -214,5 +366,82 @@ export const getSubscriptionStatus = async (req, res) => {
   } catch (error) {
     console.error('Error getting subscription status:', error);
     return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Upgrade to basic (free) plan
+export const upgradeToBasic = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Set basic plan details
+    const now = new Date();
+    user.subscription = user.subscription || {};
+    user.subscription.isActive = true;
+    user.subscription.startDate = now;
+    user.subscription.endDate = null; // No end date for basic plan
+    user.subscription.planId = PLANS.BASIC.id;
+    user.subscription.promptLimit = PLANS.BASIC.promptLimit;
+    user.markModified('subscription');
+    
+    await user.save();
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Successfully upgraded to Basic plan',
+      subscription: {
+        isActive: true,
+        planId: PLANS.BASIC.id,
+        promptLimit: PLANS.BASIC.promptLimit
+      }
+    });
+  } catch (error) {
+    console.error('Error upgrading to basic plan:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Cancel subscription
+export const cancelSubscription = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (!user.subscription || !user.subscription.isActive) {
+      return res.status(400).json({ message: 'No active subscription to cancel' });
+    }
+    
+    // Keep the subscription active until the end date
+    // Just mark it as non-renewable
+    user.subscription.autoRenew = false;
+    user.subscription.canceledAt = new Date();
+    user.markModified('subscription');
+    
+    await user.save();
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Subscription canceled successfully. You can continue using your current plan until it expires.',
+      subscription: {
+        isActive: user.subscription.isActive,
+        planId: user.subscription.planId,
+        endDate: user.subscription.endDate,
+        autoRenew: false
+      }
+    });
+  } catch (error) {
+    console.error('Error canceling subscription:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };

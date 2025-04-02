@@ -34,18 +34,18 @@ export const getPrompts = async (req, res) => {
   try {
     // Get userId from authenticated user
     const userId = req.user.id;
-    console.log('getPrompts - User ID:', userId);
+    // console.log('getPrompts - User ID:', userId);
     
     if (useTestData) {
-      console.log('getPrompts - Using test data');
+      // console.log('getPrompts - Using test data');
       const filteredPrompts = testPrompts.filter(p => p.userId === userId);
-      console.log('getPrompts - Found prompts:', filteredPrompts.length);
+      // console.log('getPrompts - Found prompts:', filteredPrompts.length);
       return res.status(200).json(filteredPrompts);
     }
     
-    console.log('getPrompts - Using database');
+    // console.log('getPrompts - Using database');
     const prompts = await Prompt.find({ userId }).sort({ updatedAt: -1 });
-    console.log('getPrompts - Found prompts:', prompts.length);
+    // console.log('getPrompts - Found prompts:', prompts.length);
     res.status(200).json(prompts);
   } catch (error) {
     console.error('getPrompts - Error:', error.message);

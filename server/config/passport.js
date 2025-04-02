@@ -30,14 +30,14 @@ const createCallbackURL = (req) => {
   return `${protocol}://${host}${callbackPath}`;
 };
 
-console.log('Passport config - Google Client ID:', GOOGLE_CLIENT_ID ? 'ID present' : 'No ID');
-console.log('Passport config - Google Client Secret:', GOOGLE_CLIENT_SECRET ? 'Secret present' : 'No secret');
-console.log('Passport config - Callback Path:', CALLBACK_PATH);
+// console.log('Passport config - Google Client ID:', GOOGLE_CLIENT_ID ? 'ID present' : 'No ID');
+// console.log('Passport config - Google Client Secret:', GOOGLE_CLIENT_SECRET ? 'Secret present' : 'No secret');
+// console.log('Passport config - Callback Path:', CALLBACK_PATH);
 
 // Create a function that returns the strategy with the dynamic callback URL
 const createGoogleStrategy = (req) => {
   const callbackURL = createCallbackURL(req);
-  console.log('Passport config - Generated Callback URL:', callbackURL);
+  // console.log('Passport config - Generated Callback URL:', callbackURL);
   
   return new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
@@ -46,14 +46,14 @@ const createGoogleStrategy = (req) => {
     passReqToCallback: true
   },
   async (req, accessToken, refreshToken, profile, done) => {
-    console.log('Google Strategy - Profile received:', profile.id);
+    // console.log('Google Strategy - Profile received:', profile.id);
     try {
       // Check if user exists
       let user = await User.findOne({ googleId: profile.id });
-      console.log('Google Strategy - User found:', user ? 'Yes' : 'No');
+      // console.log('Google Strategy - User found:', user ? 'Yes' : 'No');
       
       if (!user) {
-        console.log('Google Strategy - Creating new user');
+        // console.log('Google Strategy - Creating new user');
         // Create new user if doesn't exist
         user = await User.create({
           googleId: profile.id,
@@ -63,7 +63,7 @@ const createGoogleStrategy = (req) => {
           lastName: profile.name.familyName,
           avatar: profile.photos[0].value
         });
-        console.log('Google Strategy - New user created:', user.id);
+        // console.log('Google Strategy - New user created:', user.id);
       }
       
       return done(null, user);

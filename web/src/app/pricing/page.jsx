@@ -19,6 +19,7 @@ export default function Pricing() {
       if (!token) {
         setError('Authentication required');
         setIsLoading(false);
+        router.push('/login');
         return;
       }
 
@@ -33,9 +34,10 @@ export default function Pricing() {
 
       const data = await response.json();
 
-      if (response.ok && data.paymentLink) {
-        // Redirect to payment gateway
-        window.location.href = data.paymentLink;
+      if (response.ok && data.paymentSessionId) {
+        // Store order info and redirect to payment page
+        localStorage.setItem('pendingOrderId', data.orderId);
+        router.push(`/dashboard/payment?session_id=${data.paymentSessionId}`);
       } else {
         setError(data.message || 'Failed to create subscription order');
       }
@@ -50,39 +52,71 @@ export default function Pricing() {
   const plans = [
     {
       id: 'basic',
-      name: 'Basic',
-      price: '₹499',
-      period: 'per month',
+      name: 'Basic Plan',
+      price: 'Free',
+      period: 'forever',
       features: [
-        '100 prompts per day',
-        'Basic support',
-        'Access to standard templates'
+        'Store up to 50 prompts',
+        'Basic organization with tags',
+        'Local storage only',
+        'Community support'
       ]
     },
     {
-      id: 'pro',
-      name: 'Professional',
+      id: 'advanced',
+      name: 'Advanced Plan',
       price: '₹999',
-      period: 'per month',
+      period: 'one-time payment',
       features: [
-        'Unlimited prompts',
+        'Store up to 300 prompts',
+        'Advanced organization system',
+        'Cloud sync across devices',
         'Priority support',
-        'Access to all templates',
-        'Advanced customization'
+        'Advanced templates'
       ],
       popular: true
     },
     {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price: '₹2499',
+      id: 'unlimited_monthly',
+      name: 'Unlimited Monthly',
+      price: '₹499',
       period: 'per month',
       features: [
         'Unlimited prompts',
-        'Dedicated support',
-        'Custom templates',
-        'Team collaboration',
-        'API access'
+        'Advanced organization system',
+        'Cloud sync across devices',
+        'Team sharing capabilities',
+        'Priority support',
+        'Advanced templates'
+      ]
+    },
+    {
+      id: 'unlimited_quarterly',
+      name: 'Unlimited Quarterly',
+      price: '₹1299',
+      period: 'per quarter',
+      features: [
+        'Unlimited prompts',
+        'Advanced organization system',
+        'Cloud sync across devices',
+        'Team sharing capabilities',
+        'Priority support',
+        'Advanced templates'
+      ],
+      bestValue: true
+    },
+    {
+      id: 'unlimited_yearly',
+      name: 'Unlimited Yearly',
+      price: '₹4999',
+      period: 'per year',
+      features: [
+        'Unlimited prompts',
+        'Advanced organization system',
+        'Cloud sync across devices',
+        'Team sharing capabilities',
+        'Priority support',
+        'Advanced templates'
       ]
     }
   ];
@@ -101,17 +135,22 @@ export default function Pricing() {
         )}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {plans.map((plan) => (
           <div 
             key={plan.id}
             className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden ${
               plan.popular ? 'ring-2 ring-primary' : ''
-            }`}
+            } ${plan.bestValue ? 'ring-2 ring-green-500' : ''}`}
           >
             {plan.popular && (
               <div className="bg-primary text-white text-center py-2 text-sm font-medium">
                 Most Popular
+              </div>
+            )}
+            {plan.bestValue && (
+              <div className="bg-green-500 text-white text-center py-2 text-sm font-medium">
+                Best Value
               </div>
             )}
             <div className="p-6">
@@ -131,13 +170,23 @@ export default function Pricing() {
                 ))}
               </ul>
               <div className="mt-8">
-                <button
-                  onClick={() => handleSubscribe(plan.id)}
-                  disabled={isLoading}
-                  className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-                >
-                  {isLoading ? 'Processing...' : 'Subscribe Now'}
-                </button>
+                {plan.id === 'basic' ? (
+                  <button
+                    onClick={() => handleSubscribe(plan.id)}
+                    disabled={isLoading}
+                    className="w-full bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white py-2 px-4 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                  >
+                    {isLoading ? 'Processing...' : 'Get Started Free'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleSubscribe(plan.id)}
+                    disabled={isLoading}
+                    className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                  >
+                    {isLoading ? 'Processing...' : 'Subscribe Now'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

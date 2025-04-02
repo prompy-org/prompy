@@ -131,7 +131,7 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/dashboard/pricing" className="text-primary hover:underline">
+                <Link href="/pricing" className="text-primary hover:underline">
                   Subscription Plans
                 </Link>
               </li>

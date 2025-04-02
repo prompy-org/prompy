@@ -19,13 +19,13 @@ export const fetchPrompts = async (forceRefresh = false) => {
       
       // If cache is valid and not empty, return cached prompts
       if (prompts.length > 0 && cacheAge < cacheMaxAge) {
-        console.log('Using cached prompts');
+        // console.log('Using cached prompts');
         return prompts;
       }
     }
     
     // If cache is invalid or empty, fetch from API
-    console.log('Fetching prompts from API');
+    // console.log('Fetching prompts from API');
     const response = await fetch(`${API_URL}/prompts`, {
       headers: { 
         'Authorization': `Bearer ${token}` 

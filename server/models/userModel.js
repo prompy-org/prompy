@@ -8,10 +8,23 @@ const subscriptionSchema = new mongoose.Schema({
   planId: String,
   startDate: Date,
   endDate: Date,
-  subscriptionId: String,
   orderId: String,
   paymentId: String,
-  lastPaymentDate: Date
+  lastPaymentDate: Date,
+  promptLimit: {
+    type: Number,
+    default: 50 // Default limit for free tier
+  },
+  autoRenew: {
+    type: Boolean,
+    default: true
+  },
+  canceledAt: Date,
+  pendingUpgrade: {
+    type: Boolean,
+    default: false
+  },
+  subscriptionId: String
 });
 
 const userSchema = new mongoose.Schema({
@@ -37,6 +50,10 @@ const userSchema = new mongoose.Schema({
     default: () => ({})
   },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  lastLogin: {
     type: Date,
     default: Date.now
   }

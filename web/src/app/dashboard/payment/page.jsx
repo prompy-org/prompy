@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
+import { ArrowLeft } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function Payment() {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +42,7 @@ export default function Payment() {
             contact: ''
           },
           theme: {
-            color: '#3399cc'
+            color: '#4c6ef5' // Match primary color from globals.css
           },
           modal: {
             ondismiss: function() {
@@ -60,40 +62,51 @@ export default function Payment() {
     };
 
     initializePayment();
-  }, [orderId, router]);
+  }, [orderId, router, amount, currency]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 bg-background">
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="beforeInteractive"
       />
-      <div className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+      <div className="w-full max-w-md p-8 bg-secondary rounded-lg shadow-lg border border-border">
+        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">
           Processing Payment
         </h1>
         
         {isLoading && (
           <div className="flex flex-col items-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300">Initializing payment gateway...</p>
+            <LoadingSpinner size="large" className="mb-4" />
+            <p className="text-muted-foreground">Initializing payment gateway...</p>
           </div>
         )}
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p>{error}</p>
-            <div className="mt-4 flex justify-center">
+          <div className="bg-accent border border-red-400 text-red-700 dark:text-red-400 px-6 py-4 rounded-md mb-6">
+            <p className="font-medium">{error}</p>
+            <div className="mt-6 flex justify-center">
               <button
                 onClick={() => router.push('/dashboard/pricing')}
-                className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
+                className="flex items-center gap-2 bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
               >
+                <ArrowLeft size={16} />
                 Back to Plans
               </button>
             </div>
           </div>
         )}
         
-        <div id="payment-form" className="min-h-[300px]"></div>
+        <div id="payment-form" className="min-h-[200px]"></div>
+      </div>
+      
+      <div className="mt-6 text-sm text-muted-foreground">
+        <p>Having trouble? <button 
+          onClick={() => router.push('/dashboard/pricing')} 
+          className="text-primary hover:underline"
+        >
+          Return to pricing page
+        </button></p>
       </div>
     </div>
   );

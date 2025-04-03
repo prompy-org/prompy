@@ -29,23 +29,63 @@ export default function GoogleLogin({ onLoginSuccess }) {
   return (
     <div className="flex flex-col items-center">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-4 w-full text-sm">
+          <p className="font-medium">Authentication Error</p>
+          <p>{error}</p>
         </div>
       )}
       
       <button
         onClick={handleGoogleLogin}
         disabled={isLoading}
-        className="flex items-center justify-center gap-2 w-full max-w-xs bg-white text-gray-700 border border-gray-300 rounded-md px-4 py-2 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+        className="flex items-center cursor-pointer justify-center gap-3 w-full bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-md px-4 py-3 shadow-sm border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        aria-label="Sign in with Google"
       >
         {isLoading ? (
           <div className="w-5 h-5 border-t-2 border-primary border-solid rounded-full animate-spin"></div>
         ) : (
-          <span className="google-icon">G</span>
+          <div className="flex items-center justify-center">
+            <Image 
+              src="/google-logo.svg" 
+              alt="Google" 
+              width={20} 
+              height={20} 
+              className="mr-2"
+            />
+          </div>
         )}
         <span>Sign in with Google</span>
       </button>
+      
+      {/* <div className="relative w-full my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border"></div>
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-secondary px-2 text-muted-foreground">Or continue with</span>
+        </div>
+      </div>
+      
+      <button
+        onClick={() => {
+          // This is a placeholder for demo purposes
+          // In a real app, you might want to implement a demo account login
+          setIsLoading(true);
+          setTimeout(() => {
+            localStorage.setItem('authToken', 'demo-token');
+            if (onLoginSuccess) onLoginSuccess();
+            router.push('/dashboard');
+          }, 1000);
+        }}
+        disabled={isLoading}
+        className="flex items-center justify-center w-full bg-secondary hover:bg-accent text-foreground font-medium rounded-md px-4 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      >
+        {isLoading ? (
+          <div className="w-5 h-5 border-t-2 border-primary border-solid rounded-full animate-spin"></div>
+        ) : (
+          "Try Demo Account"
+        )}
+      </button> */}
     </div>
   );
 }

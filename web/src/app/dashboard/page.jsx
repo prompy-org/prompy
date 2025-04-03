@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SubscriptionStatus from '@/components/SubscriptionStatus';
 import Image from 'next/image';
+import { useTheme } from '@/components/ThemeProvider';
+import { Download } from 'lucide-react';
 
 export default function Dashboard() {
   const [usageStats, setUsageStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useTheme();
   
   useEffect(() => {
     const fetchUsageStats = async () => {
@@ -51,7 +54,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           {/* Main dashboard content */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-6">Manage Your Prompts</h2>
             
             <div className="text-center py-8 space-y-6">
@@ -64,19 +67,17 @@ export default function Dashboard() {
                   className="mx-auto mb-4"
                 />
                 <h3 className="text-lg font-medium mb-2">Install Our Chrome Extension</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">
+                <p className="text-muted-foreground mb-6">
                   To access and manage your prompts, please install our Chrome extension. 
                   The extension provides a seamless experience for creating, editing, and using your prompts directly in your browser.
                 </p>
                 <Link 
                   href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
-                  className="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary/90 inline-flex items-center"
+                  className="bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors inline-flex items-center"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
+                  <Download className="h-5 w-5 mr-2" />
                   Install Chrome Extension
                 </Link>
               </div>
@@ -88,12 +89,12 @@ export default function Dashboard() {
           {/* Sidebar with subscription status */}
           <SubscriptionStatus userSubscription={usageStats?.subscription} />
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Usage Stats</h2>
             {isLoading ? (
               <div className="animate-pulse space-y-4">
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                <div className="h-6 bg-muted rounded w-3/4"></div>
+                <div className="h-6 bg-muted rounded w-1/2"></div>
               </div>
             ) : error ? (
               <div className="text-red-500 p-4 border border-red-300 rounded-md">
@@ -102,11 +103,11 @@ export default function Dashboard() {
             ) : usageStats ? (
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Prompts Created</p>
+                  <p className="text-sm text-muted-foreground">Prompts Created</p>
                   <p className="text-lg font-medium">{usageStats.promptCount || 0}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Last Activity</p>
+                  <p className="text-sm text-muted-foreground">Last Activity</p>
                   <p className="text-lg font-medium">
                     {usageStats.lastActivity 
                       ? new Date(usageStats.lastActivity).toLocaleDateString() 
@@ -114,7 +115,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Account Created</p>
+                  <p className="text-sm text-muted-foreground">Account Created</p>
                   <p className="text-lg font-medium">
                     {usageStats.createdAt 
                       ? new Date(usageStats.createdAt).toLocaleDateString() 
@@ -123,31 +124,31 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 dark:text-gray-400">No usage data available</p>
+              <p className="text-muted-foreground">No usage data available</p>
             )}
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
             <ul className="space-y-2">
               <li>
-                <Link href="/pricing" className="text-primary hover:underline">
+                <Link href="/pricing" className="text-primary hover:text-primary/80 hover:underline transition-colors">
                   Subscription Plans
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/settings" className="text-primary hover:underline">
+                <Link href="/dashboard/settings" className="text-primary hover:text-primary/80 hover:underline transition-colors">
                   Account Settings
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/support" className="text-primary hover:underline">
+                <Link href="/dashboard/support" className="text-primary hover:text-primary/80 hover:underline transition-colors">
                   Get Support
                 </Link>
               </li>
               <li>
                 <Link href="https://chrome.google.com/webstore/detail/prompy/your-extension-id" 
-                  className="text-primary hover:underline"
+                  className="text-primary hover:text-primary/80 hover:underline transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

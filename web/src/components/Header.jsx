@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthenticated, logout } from "@/services/auth";
 import { Menu, X, ChevronDown, User, LogOut } from "lucide-react";
+import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,6 +39,9 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:block">
           <ul className="flex items-center gap-6">
+            <li>
+              <ThemeToggle />
+            </li>
             <li>
               <Link 
                 href="/#features" 
@@ -130,14 +134,20 @@ export default function Header() {
           </ul>
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-foreground"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center gap-4 md:hidden">
+          {/* Mobile Theme Toggle */}
+          <div>
+            <ThemeToggle />
+          </div>
+          {/* Mobile Menu Button */}
+          <button 
+            className="text-foreground"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}

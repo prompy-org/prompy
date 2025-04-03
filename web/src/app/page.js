@@ -11,14 +11,14 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
               Prompy - Your AI Prompt Manager
             </h1>
-            <p className="text-lg sm:text-xl text-foreground/80">
+            <p className="text-lg sm:text-xl text-muted-foreground">
               Securely store, organize, and manage your AI prompts. Perfect for prompt engineers, 
               content creators, and AI enthusiasts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link 
                 href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
-                className="rounded-full bg-foreground text-background px-6 py-3 font-medium hover:bg-[#383838] dark:hover:bg-[#ccc] flex items-center justify-center gap-2"
+                className="rounded-full bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -31,7 +31,7 @@ export default function Home() {
               </Link>
               <a 
                 href="#features"
-                className="rounded-full border border-black/[.08] dark:border-white/[.145] px-6 py-3 font-medium hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] flex items-center justify-center"
+                className="rounded-full border border-border px-6 py-3 font-medium hover:bg-accent hover:text-accent-foreground transition-colors flex items-center justify-center"
               >
                 Learn More
               </a>
@@ -52,17 +52,17 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 px-6 sm:px-20 bg-[#f8f9fa] dark:bg-[#111]">
+      <section id="features" className="py-16 px-6 sm:px-20 bg-secondary">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-background p-6 rounded-xl shadow-sm">
-                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#f0f4ff] dark:bg-[#1a1f36] mb-4">
+              <div key={index} className="bg-card text-card-foreground p-6 rounded-xl shadow-sm">
+                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-primary/10 mb-4">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-foreground/70">{feature.description}</p>
+                <p className="text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -70,15 +70,15 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-6 sm:px-20 bg-[#f8f9fa] dark:bg-[#111]">
+      <section className="py-16 px-6 sm:px-20 bg-secondary">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to supercharge your AI workflow?</h2>
-          <p className="text-foreground/70 mb-8 max-w-2xl mx-auto">
+          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join thousands of prompt engineers, content creators, and AI enthusiasts who use Prompy every day.
           </p>
           <Link 
             href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
-            className="rounded-full bg-foreground text-background px-8 py-4 font-medium hover:bg-[#383838] dark:hover:bg-[#ccc] inline-flex items-center justify-center gap-2"
+            className="rounded-full bg-primary text-primary-foreground px-8 py-4 font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -87,28 +87,6 @@ export default function Home() {
         </div>
       </section>
     </div>
-  );
-}
-
-// Helper component for pricing items
-function PricingItem({ children, dark = false }) {
-  return (
-    <li className="flex items-center gap-2">
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="18" 
-        height="18" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke={dark ? "white" : "currentColor"} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      >
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-      <span className={dark ? "text-background/90" : "text-foreground/90"}>{children}</span>
-    </li>
   );
 }
 

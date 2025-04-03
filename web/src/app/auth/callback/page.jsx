@@ -13,6 +13,15 @@ function AuthCallback() {
   const token = searchParams.get('token');
   const state = searchParams.get('state');
   const error = searchParams.get('error');
+  const [timer, setTimer] = useState(3);
+  useEffect(() => {
+    if (status === 'success') {
+      const interval = setInterval(() => {
+        setTimer(prevTimer => prevTimer - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [status]);
 
   useEffect(() => {
     const verifyAndStoreToken = async () => {
@@ -51,7 +60,7 @@ function AuthCallback() {
         // Redirect to dashboard after a short delay
         setTimeout(() => {
           router.push('/dashboard');
-        }, 1500);
+        }, 3000);
       } catch (err) {
         setStatus('error');
         setMessage(`Failed to store authentication: ${err.message}`);
@@ -62,12 +71,12 @@ function AuthCallback() {
   }, [token, state, error, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md p-8 bg-secondary rounded-lg shadow-md border border-border">
         {status === 'loading' && (
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300">{message}</p>
+            <p className="text-muted-foreground">{message}</p>
           </div>
         )}
         
@@ -78,8 +87,8 @@ function AuthCallback() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold mb-2">Authentication Successful!</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">Redirecting to dashboard...</p>
+            <h2 className="text-xl font-bold mb-2 text-foreground">Authentication Successful!</h2>
+            <p className="text-muted-foreground mb-4">Redirecting to dashboard in... {timer} </p>
           </div>
         )}
         
@@ -90,11 +99,11 @@ function AuthCallback() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold mb-2">Authentication Failed</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
+            <h2 className="text-xl font-bold mb-2 text-foreground">Authentication Failed</h2>
+            <p className="text-muted-foreground mb-6">{message}</p>
             <Link 
               href="/login" 
-              className="inline-block bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90"
+              className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
             >
               Try Again
             </Link>
@@ -105,6 +114,6 @@ function AuthCallback() {
   );
 }
 
-export default function Page () {
+export default function Page() {
   return <Suspense><AuthCallback /></Suspense>
 }

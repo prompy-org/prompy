@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { getToken } from '@/services/auth';
+import PaymentStatus from '@/components/PaymentStatus';
 
 export default function PaymentCallback() {
   const [status, setStatus] = useState('processing');
@@ -21,7 +22,7 @@ export default function PaymentCallback() {
   useEffect(() => {
     if (!(razorpayOrderId || razorpaySubscriptionId)) {
       setStatus('failed');
-      setError('Invalid order OR subscription ID');
+      setError('Invalid order or subscription ID');
       return;
     }
 
@@ -78,65 +79,63 @@ export default function PaymentCallback() {
     };
 
     verifyPayment();
-  }, [razorpayOrderId, razorpayPaymentId, razorpayOrderId, razorpaySignature, router]);
+  }, [razorpayOrderId, razorpayPaymentId, razorpaySignature, razorpaySubscriptionId, router]);
 
   const [timeLeft, setTimeLeft] = useState(5);
 
   useEffect(() => {
-    if (timeLeft > 0) {
+    if (status === 'success' && timeLeft > 0) {
       const timerId = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
 
       return () => clearTimeout(timerId); // Cleanup on unmount or re-run
     }
-  }, [timeLeft]);
+  }, [timeLeft, status]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
-      <div className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 bg-background">
+      <div className="w-full max-w-md p-6 bg-secondary rounded-lg shadow-lg border border-border">
+        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">
           Payment Verification
         </h1>
         
         {status === 'processing' && (
           <div className="flex flex-col items-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300">Verifying your payment...</p>
+            <p className="text-muted-foreground">Verifying your payment...</p>
           </div>
         )}
         
         {status === 'success' && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <p className="font-bold">Payment Successful!</p>
-            <p className="mt-2">Your subscription has been activated.</p>
-            {subscription && (
-              <div className="mt-4">
-                <p>Plan: {subscription.planId}</p>
-                {subscription.endDate && (
-                  <p>Valid until: {new Date(subscription.endDate).toLocaleDateString()}</p>
-                )}
-              </div>
-            )}
-            <div className="mt-4 flex justify-center">
-              <p>Redirecting to dashboard in {timeLeft}...  </p>
-            </div>
+          <div>
+            <PaymentStatus 
+              status="success" 
+              message={
+                <>
+                  Your subscription has been activated.
+                  {subscription && (
+                    <div className="mt-4 text-muted-foreground">
+                      <p>Plan: {subscription.planId}</p>
+                      {subscription.endDate && (
+                        <p>Valid until: {new Date(subscription.endDate).toLocaleDateString()}</p>
+                      )}
+                      <p className="mt-4">Redirecting to dashboard in {timeLeft}...</p>
+                    </div>
+                  )}
+                </>
+              }
+              redirectPath="/dashboard"
+            />
           </div>
         )}
         
         {status === 'failed' && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p className="font-bold">Payment Verification Failed</p>
-            <p className="mt-2">{error}</p>
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={() => router.push('/dashboard/pricing')}
-                className="bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
-              >
-                Back to Plans
-              </button>
-            </div>
-          </div>
+          <PaymentStatus 
+            status="error" 
+            message={error} 
+            redirectPath="/dashboard/pricing" 
+          />
         )}
       </div>
     </div>

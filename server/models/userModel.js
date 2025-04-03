@@ -6,15 +6,12 @@ const subscriptionSchema = new mongoose.Schema({
     default: false
   },
   planId: String,
+  planName: String,
   startDate: Date,
   endDate: Date,
   orderId: String,
   paymentId: String,
   lastPaymentDate: Date,
-  promptLimit: {
-    type: Number,
-    default: 50 // Default limit for free tier
-  },
   autoRenew: {
     type: Boolean,
     default: true
@@ -45,6 +42,14 @@ const userSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
   avatar: String,
+  promptLimit: {
+    type: Number,
+    default: 50 // Default limit for free tier
+  },
+  promptCount: {
+    type: Number,
+    default: 0
+  },
   subscription: {
     type: subscriptionSchema,
     default: () => ({})

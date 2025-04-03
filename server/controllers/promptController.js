@@ -1,6 +1,7 @@
 import Prompt from '../models/promptModel.js';
 import * as process from 'node:process';
 import dotenv from 'dotenv';
+import User from '../models/userModel.js';
 
 dotenv.config();
 
@@ -100,7 +101,12 @@ export const createPrompt = async (req, res) => {
       userId,
       tags: tags || []
     });
-    
+
+    // Increment prompt count for the user
+    const user = await User.findById(userId);
+    user.promptCount += 1;
+    await user.save();
+
     res.status(201).json(newPrompt);
   } catch (error) {
     res.status(400).json({ message: 'Error creating prompt', error: error.message });
@@ -159,6 +165,11 @@ export const deletePrompt = async (req, res) => {
     
     if (!deletedPrompt) return res.status(404).json({ message: 'Prompt not found' });
     
+    // Decrement prompt count for the user
+    const user = await User.findById(req.user.id);
+    user.promptCount -= 1;
+    await user.save();
+
     res.status(200).json({ message: 'Prompt deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting prompt', error: error.message });

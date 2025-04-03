@@ -1,4 +1,3 @@
-import SubscriptionButton from "@/components/SubscriptionButton";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -66,60 +65,6 @@ export default function Home() {
                 <p className="text-foreground/70">{feature.description}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-16 px-6 sm:px-20">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">Simple Pricing</h2>
-          <p className="text-center text-foreground/70 mb-12 max-w-2xl mx-auto">
-            Choose the plan that works best for you and your team
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Plan */}
-            <div className="border border-black/[.08] dark:border-white/[.145] rounded-2xl p-8 flex flex-col">
-              <h3 className="text-2xl font-bold mb-2">Free</h3>
-              <p className="text-foreground/70 mb-6">Perfect for getting started</p>
-              <div className="text-4xl font-bold mb-6">$0<span className="text-lg font-normal text-foreground/70">/month</span></div>
-              
-              <ul className="space-y-3 mb-8">
-                <PricingItem>Store up to 50 prompts</PricingItem>
-                <PricingItem>Basic organization with tags</PricingItem>
-                <PricingItem>Local storage only</PricingItem>
-                <PricingItem>Community support</PricingItem>
-              </ul>
-              
-              <Link 
-                href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
-                className="mt-auto rounded-full border border-black/[.08] dark:border-white/[.145] px-6 py-3 font-medium hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] text-center"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Get Started
-              </Link>
-            </div>
-            
-            {/* Unlimited Plan */}
-            <div className="bg-foreground text-background rounded-2xl p-8 flex flex-col relative overflow-hidden">
-              <div className="absolute top-4 right-4 bg-[#4c6ef5] text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
-              <h3 className="text-2xl font-bold mb-2">Unlimited</h3>
-              <p className="text-background/70 mb-6">For power users and teams</p>
-              <div className="text-4xl font-bold mb-6">$9<span className="text-lg font-normal text-background/70">/month</span></div>
-              
-              <ul className="space-y-3 mb-8">
-                <PricingItem dark>Unlimited prompts</PricingItem>
-                <PricingItem dark>Advanced organization system</PricingItem>
-                <PricingItem dark>Cloud sync across devices</PricingItem>
-                <PricingItem dark>Team sharing capabilities</PricingItem>
-                <PricingItem dark>Priority support</PricingItem>
-                <PricingItem dark>Advanced templates</PricingItem>
-              </ul>
-              
-              <SubscriptionButton planId="unlimited" className="mt-auto rounded-full bg-[#4c6ef5] hover:bg-[#3b5bdb] text-foreground px-6 py-3 font-medium text-center" />
-            </div>
           </div>
         </div>
       </section>

@@ -11,12 +11,17 @@ export default function PaymentCallback() {
   const [subscription, setSubscription] = useState(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('order_id');
+  
+  // Get Razorpay parameters from URL
+  const razorpayPaymentId = searchParams.get('razorpay_payment_id');
+  const razorpayOrderId = searchParams.get('razorpay_order_id');
+  const razorpaySubscriptionId = searchParams.get('razorpay_subscription_id');
+  const razorpaySignature = searchParams.get('razorpay_signature');
 
   useEffect(() => {
-    if (!orderId) {
+    if (!(razorpayOrderId || razorpaySubscriptionId)) {
       setStatus('failed');
-      setError('Invalid order ID');
+      setError('Invalid order OR subscription ID');
       return;
     }
 
@@ -28,10 +33,27 @@ export default function PaymentCallback() {
           return;
         }
 
-        // First check if webhook has already processed the payment
-        const response = await axios.get(`/api/subscription/verify/${orderId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        let response;
+        
+        // If we have Razorpay signature parameters, verify the payment directly
+        if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
+          response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/verify-payment`, {
+            razorpay_payment_id: razorpayPaymentId,
+            razorpay_order_id: razorpayOrderId,
+            razorpay_signature: razorpaySignature
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } 
+        else if (razorpaySubscriptionId) {
+          response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/subscription/verify-subscription`, {
+            razorpay_subscription_id: razorpaySubscriptionId,
+            razorpay_payment_id: razorpayPaymentId,
+            razorpay_signature: razorpaySignature
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }        
 
         if (response.data.success) {
           setStatus('success');
@@ -56,7 +78,19 @@ export default function PaymentCallback() {
     };
 
     verifyPayment();
-  }, [orderId, router]);
+  }, [razorpayOrderId, razorpayPaymentId, razorpayOrderId, razorpaySignature, router]);
+
+  const [timeLeft, setTimeLeft] = useState(5);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timerId = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+
+      return () => clearTimeout(timerId); // Cleanup on unmount or re-run
+    }
+  }, [timeLeft]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
@@ -85,7 +119,7 @@ export default function PaymentCallback() {
               </div>
             )}
             <div className="mt-4 flex justify-center">
-              <p>Redirecting to dashboard...</p>
+              <p>Redirecting to dashboard in {timeLeft}...  </p>
             </div>
           </div>
         )}

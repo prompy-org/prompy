@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { load } from '@cashfreepayments/cashfree-js';
+import Script from 'next/script';
 
 export default function Payment() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
+  const orderId = searchParams.get('order_id');
+  const amount = searchParams.get('amount');
+  const currency = searchParams.get('currency');
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!orderId) {
       setError('Invalid payment session');
       setIsLoading(false);
       return;
@@ -20,33 +22,35 @@ export default function Payment() {
 
     const initializePayment = async () => {
       try {
-        // Load Cashfree SDK
-        const cashfree = await load({
-          mode: "sandbox" // Change to "production" for production environment
-        });
-        
-        // Configure checkout options
-        const checkoutOptions = {
-          paymentSessionId: sessionId,
-          redirectTarget: "_self",
-          onSuccess: (data) => {
-            // Payment successful, redirect to callback page
-            const orderId = localStorage.getItem('pendingOrderId');
-            router.push(`/dashboard/payment/callback?order_id=${orderId}`);
+        // Initialize Razorpay checkout
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: amount,
+          currency: currency,
+          name: 'Prompy',
+          description: 'Subscription Payment',
+          order_id: orderId,
+          handler: function (response) {
+            // Redirect to callback page with order ID
+            router.push(`/dashboard`);
           },
-          onFailure: (data) => {
-            console.error('Payment failed:', data);
-            setError('Payment failed. Please try again.');
-            setIsLoading(false);
+          prefill: {
+            name: '',
+            email: '',
+            contact: ''
           },
-          onClose: () => {
-            // User closed the payment form
-            router.push('/dashboard/pricing');
+          theme: {
+            color: '#3399cc'
+          },
+          modal: {
+            ondismiss: function() {
+              router.push('/dashboard/pricing');
+            }
           }
         };
-        
-        // Initialize checkout
-        cashfree.checkout(checkoutOptions);
+
+        const paymentObject = new Razorpay(options);
+        paymentObject.open();
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing payment:', error);
@@ -56,19 +60,22 @@ export default function Payment() {
     };
 
     initializePayment();
-  }, [sessionId, router]);
+  }, [orderId, router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
       <div className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
-          Complete Your Payment
+          Processing Payment
         </h1>
         
         {isLoading && (
           <div className="flex flex-col items-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300">Loading payment gateway...</p>
+            <p className="text-gray-600 dark:text-gray-300">Initializing payment gateway...</p>
           </div>
         )}
         

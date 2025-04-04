@@ -35,26 +35,6 @@ const getApiUrl = async () => {
   });
 };
 
-// Login with test credentials (for development)
-export const testLogin = async () => {
-  try {
-    const apiUrl = await getApiUrl();
-    const response = await fetch(`${apiUrl}/auth/test-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    
-    if (!response.ok) throw new Error('Login failed');
-    
-    const data = await response.json();
-    await storeToken(data.token);
-    return data.token;
-  } catch (error) {
-    console.error('Test login error:', error);
-    throw error;
-  }
-};
-
 // Logout user
 export const logout = async () => {
   await removeToken();

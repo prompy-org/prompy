@@ -2,6 +2,7 @@ import Prompt from '../models/promptModel.js';
 import * as process from 'node:process';
 import dotenv from 'dotenv';
 import User from '../models/userModel.js';
+import PLANS from '../constants/plans.js';
 
 dotenv.config();
 
@@ -81,20 +82,36 @@ export const createPrompt = async (req, res) => {
     // Get userId from authenticated user
     const userId = req.user.id;
     
-    if (useTestData) {
-      const newPrompt = {
-        _id: Date.now().toString(),
-        title,
-        content,
-        userId,
-        tags: tags || [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      testPrompts.push(newPrompt);
-      return res.status(201).json(newPrompt);
+    
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
     
+    // Check subscription status
+    const hasActiveSubscription = user.subscription && user.subscription.isActive;
+    const isSubscriptionExpired = hasActiveSubscription && user.subscription.endDate && new Date() > new Date(user.subscription.endDate);
+    
+    // If subscription has expired, update user record
+    if (isSubscriptionExpired) {
+      user.subscription.isActive = false;
+      user.promptLimit = user.isAdvancedUser ? PLANS.ONE_TIME_PAYMENT_PLAN.promptLimit : PLANS.FREE_TIER.promptLimit; // Reset to free tier limit
+      await user.save();
+      return res.status(403).json({ message: 'Subscription expired. Please renew to create more prompts.' });
+    }
+    
+    // Check if user has reached prompt limit
+    if (user.promptLimit !== -1 && user.promptCount >= user.promptLimit) {
+      return res.status(403).json({ 
+        message: 'Prompt limit reached',
+        currentCount: user.promptCount,
+        limit: user.promptLimit,
+        needsUpgrade: true
+      });
+    }
+
+    // Create the new prompt
     const newPrompt = await Prompt.create({
       title,
       content,
@@ -103,12 +120,12 @@ export const createPrompt = async (req, res) => {
     });
 
     // Increment prompt count for the user
-    const user = await User.findById(userId);
     user.promptCount += 1;
     await user.save();
 
     res.status(201).json(newPrompt);
   } catch (error) {
+    console.error('Error creating prompt:', error);
     res.status(400).json({ message: 'Error creating prompt', error: error.message });
   }
 };

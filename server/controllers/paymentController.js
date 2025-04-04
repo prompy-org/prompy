@@ -2,49 +2,9 @@ import crypto from 'crypto';
 import User from '../models/userModel.js';
 import dotenv from 'dotenv';
 import razorpayInstance from '../config/razorpay.js';
+import PLANS from '../constants/plans.js';
 
 dotenv.config();
-
-// Constants for subscription plans
-const PLANS = {
-  ONE_TIME_PAYMENT_PLAN: {
-    id: 'one_time_payment_plan',
-    name: 'Advanced',
-    description: 'For Advanced users',
-    amount: 353,
-    currency: 'INR',
-    interval: null, // One-time payment
-    promptLimit: 500,
-    durationMonths: 0
-  },
-  UNLIMITED_MONTHLY: {
-    id: 'plan_QEC1WFar5vOq6u',
-    name: 'Unlimited Monthly Plan',
-    amount: 153,
-    currency: 'INR',
-    interval: 'monthly',
-    promptLimit: 0,
-    durationMonths: 1
-  },
-  UNLIMITED_QUARTERLY: {
-    id: 'unlimited_quarterly',
-    name: 'Unlimited Quarterly Plan',
-    amount: 453,
-    currency: 'INR',
-    interval: 'quarterly',
-    promptLimit: 0,
-    durationMonths: 3
-  },
-  UNLIMITED_YEARLY: {
-    id: 'unlimited_yearly',
-    name: 'Unlimited Yearly Plan',
-    amount: 1653,
-    currency: 'INR',
-    interval: 'yearly',
-    promptLimit: 0,
-    durationMonths: 12
-  }
-};
 
 // Create order
 export const createOrder = async (req, res) => {
@@ -199,6 +159,8 @@ const handleSuccessfulPayment = async (orderId) => {
     user.subscription.isActive = true;
     user.subscription.paymentId = paymentId;
     user.promptLimit = plan.promptLimit;
+    user.subscription.lastPaymentDate = new Date();
+    user.isAdvancedUser = user.subscription.planId === 'one_time_payment_plan';
     user.subscription.pendingUpgrade = false;
     if (plan.durationMonths > 0) {
       // extend the current end date of the subscription

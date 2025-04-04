@@ -33,7 +33,7 @@ router.get('/google/callback',
     // console.log('OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
+    const jwtSecret = process.env.JWT_SECRET;
     const token = jwt.sign(
       { 
         id: req.user.id, 
@@ -100,7 +100,7 @@ router.get('/google/web/callback',
     // console.log('Web OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
+    const jwtSecret = process.env.JWT_SECRET;
     const token = jwt.sign(
       { 
         id: req.user.id, 
@@ -122,25 +122,6 @@ router.get('/google/web/callback',
 // Login failed route
 router.get('/login-failed', (req, res) => {
   res.status(401).json({ message: 'Login failed' });
-});
-
-// Test login route (for development only)
-router.post('/test-login', (req, res) => {
-  // console.log('Test login - Request received');
-  
-  // Create JWT token with test user
-  const token = jwt.sign(
-    { 
-      id: 'test-user-1', 
-      email: 'test@example.com',
-      name: 'Test User'
-    },
-    process.env.JWT_SECRET || 'test-jwt-secret',
-    { expiresIn: '7d' }
-  );
-  
-  // console.log('Test login - Token created');
-  res.status(200).json({ token });
 });
 
 export default router;

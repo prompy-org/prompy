@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
-import { testLogin } from '../services/auth';
 import './Login.css';
 
 function Login({ onLoginSuccess }) {
@@ -16,20 +15,6 @@ function Login({ onLoginSuccess }) {
       }
     });
   }, []);
-
-  const handleTestLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await testLogin();
-      onLoginSuccess();
-    } catch (err) {
-      setError('Login failed. Please try again.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleGoogleLogin = () => {
     // Generate a random state value for security
@@ -59,18 +44,6 @@ function Login({ onLoginSuccess }) {
         >
           <span className="google-icon">G</span>
           Sign in with Google
-        </button>
-        
-        <div className="divider">
-          <span>OR</span>
-        </div>
-        
-        <button 
-          onClick={handleTestLogin}
-          disabled={isLoading}
-          className="test-login-button"
-        >
-          {isLoading ? 'Logging in...' : 'Use Test Account'}
         </button>
       </div>
     </div>

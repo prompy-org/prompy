@@ -11,10 +11,7 @@ export const getUserStats = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
-    // Count prompts
-    const promptCount = await Prompt.countDocuments({ userId });
-    
+        
     // Get last activity (most recent prompt update)
     const lastPrompt = await Prompt.findOne({ userId })
       .sort({ updatedAt: -1 })
@@ -22,10 +19,13 @@ export const getUserStats = async (req, res) => {
     
     // Prepare stats
     const stats = {
-      promptCount,
+      promptCount: user.promptCount,
+      promptLimit: user.promptLimit,
+      isAdvancedUser: user.isAdvancedUser,
       lastActivity: lastPrompt?.updatedAt || null,
       createdAt: user.createdAt,
       subscription: {
+        planId: user.subscription?.planId || null,
         isActive: user.subscription?.isActive || false,
         plan: user.subscription?.planId || null,
         expiresAt: user.subscription?.endDate || null

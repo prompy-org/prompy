@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
   avatar: String,
+  isAdvancedUser: {
+    type: Boolean,
+    default: false
+  },
   promptLimit: {
     type: Number,
     default: 50 // Default limit for free tier

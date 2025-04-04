@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SubscriptionStatus from '@/components/SubscriptionStatus';
+import PromptLimitIndicator from '@/components/PromptLimitIndicator';
 import Image from 'next/image';
 import { useTheme } from '@/components/ThemeProvider';
-import { Download } from 'lucide-react';
+import { Download, Crown } from 'lucide-react';
 
 export default function Dashboard() {
   const [usageStats, setUsageStats] = useState(null);
@@ -47,9 +48,22 @@ export default function Dashboard() {
     fetchUsageStats();
   }, []);
   
+  // Determine if user is premium
+  const isPremium = usageStats?.subscription?.planId !== 'one_time_payment_plan' && 
+                   usageStats?.subscription?.isActive && 
+                   usageStats?.subscription?.planId !== 'plan_basic';
+  
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6 flex items-center">
+        Dashboard
+        {isPremium && (
+          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-200 to-yellow-500 text-yellow-800 dark:text-yellow-900">
+            <Crown className="h-3 w-3 mr-1" />
+            Premium
+          </span>
+        )}
+      </h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
@@ -88,6 +102,15 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Sidebar with subscription status */}
           <SubscriptionStatus userSubscription={usageStats?.subscription} />
+          
+          {/* Prompt Limit Indicator */}
+          {!isLoading && !error && usageStats && (
+            <PromptLimitIndicator 
+              promptCount={usageStats.promptCount || 0} 
+              promptLimit={usageStats.promptLimit || 50}
+              isPremium={isPremium}
+            />
+          )}
           
           <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Usage Stats</h2>

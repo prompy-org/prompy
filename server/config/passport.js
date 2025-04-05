@@ -7,9 +7,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Hard-coded values for testing (replace with env variables in production)
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'your-test-client-id';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'your-test-client-secret';
-const CALLBACK_PATH = process.env.CALLBACK_PATH || '/api/auth/google/callback';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
 // Function to dynamically create the callback URL
 const createCallbackURL = (req) => {
@@ -24,7 +24,7 @@ const createCallbackURL = (req) => {
   
   // Use the appropriate callback path based on the request type
   const callbackPath = isWebAuth 
-    ? process.env.WEB_CALLBACK_PATH || '/api/auth/google/web/callback'
+    ? process.env.WEB_CALLBACK_PATH
     : CALLBACK_PATH;
   
   return `${protocol}://${host}${callbackPath}`;

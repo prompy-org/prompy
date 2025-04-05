@@ -2,7 +2,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Load saved options
   chrome.storage.sync.get({
-    apiUrl: `${process.env.VITE_API_URL}`,
     theme: 'system',
     syncFrequency: 15
   }, (items) => {

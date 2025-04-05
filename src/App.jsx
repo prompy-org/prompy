@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import PromptList from './components/PromptList';
 import PromptForm from './components/PromptForm';
 import PromptView from './components/PromptView';
+import PromptLimitIndicator from './components/PromptLimitIndicator';
 import Login from './components/Login';
-import { fetchPrompts, createPrompt, updatePrompt, deletePrompt } from './services/api';
+import { fetchPrompts, createPrompt, updatePrompt, deletePrompt, fetchUserStats } from './services/api';
 import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
 import { clearCachedPrompts, getCachedPrompts, getSyncFrequency } from './services/storageService';
 import { FiRefreshCw, FiPlus, FiLogOut, FiExternalLink, FiMoon, FiSun } from 'react-icons/fi';
@@ -23,6 +24,16 @@ function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
+  
+  // New state variables for user stats
+  const [userStats, setUserStats] = useState({
+    promptCount: 0,
+    promptLimit: 50,
+    isPremium: false,
+    isAdvancedUser: false,
+    subscription: null,
+    activeSubscriptions: []
+  });
 
   // Check if dark mode was previously enabled
   useEffect(() => {
@@ -92,8 +103,16 @@ function App() {
         setPrompts(data);
         setLastFetchTime(Date.now());
       }
+      
+      // Fetch user stats
+      const fetchedUserStats = await fetchUserStats();
+      setUserStats(fetchedUserStats);
     } catch (err) {
-      setError('Failed to load prompts. Please try again.');
+      if (err.message && err.message.includes('Prompt limit reached')) {
+        setError('You have reached your prompt limit. Please upgrade to create more prompts.');
+      } else {
+        setError('Failed to fetch prompts. Please try again.');
+      }
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -132,6 +151,12 @@ function App() {
   };
 
   const handleSave = async (promptData) => {
+    // Check if user has reached prompt limit
+    if (!currentPrompt && userStats.promptCount >= userStats.promptLimit && userStats.promptLimit !== -1) {
+      setError('You have reached your prompt limit. Please upgrade to create more prompts.');
+      return;
+    }
+    
     setIsLoading(true);
     try {
       if (currentPrompt) {
@@ -145,7 +170,11 @@ function App() {
       setCurrentPrompt(null);
       setIsFormVisible(false);
     } catch (err) {
-      setError('Failed to save prompt. Please try again.');
+      if (err.message && err.message.includes('Prompt limit reached')) {
+        setError('You have reached your prompt limit. Please upgrade to create more prompts.');
+      } else {
+        setError('Failed to save prompt. Please try again.');
+      }
       console.error('Error saving prompt: ', err);
     } finally {
       setIsLoading(false);
@@ -264,6 +293,16 @@ function App() {
       {error && <div className="error-message">{error}</div>}
       
       <main>
+        {/* Add PromptLimitIndicator at the top of the main content */}
+        <PromptLimitIndicator 
+          promptCount={userStats.promptCount} 
+          promptLimit={userStats.promptLimit}
+          isPremium={userStats.isPremium}
+          expiresAt={userStats.subscription?.expiresAt}
+          isAdvancedUser={userStats.isAdvancedUser}
+          activeSubscriptions={userStats.activeSubscriptions}
+        />
+        
         {isFormVisible ? (
           <PromptForm 
             prompt={currentPrompt} 

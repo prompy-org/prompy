@@ -23,7 +23,7 @@ export default function PromptLimitIndicator({ promptCount, promptLimit, isPremi
     if (hasUnlimitedPrompts) return { color: 'bg-primary', textColor: 'text-primary', status: 'unlimited' };
     
     if (percentage >= 100) return { color: 'bg-red-500', textColor: 'text-red-500', status: 'exceeded' };
-    if (percentage >= 80) return { color: 'bg-amber-500', textColor: 'text-amber-500', status: 'warning' };
+    if (percentage >= 95) return { color: 'bg-amber-500', textColor: 'text-amber-500', status: 'warning' };
     return { color: 'bg-green-500', textColor: 'text-green-500', status: 'good' };
   };
   

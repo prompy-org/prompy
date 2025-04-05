@@ -161,7 +161,7 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
               className="tag-list-container" 
               onWheel={(e) => {
                 // Prevent default scrolling behavior
-                e.preventDefault();
+                // e.preventDefault();
                 e.stopPropagation();
                 
                 // Get the container

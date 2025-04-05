@@ -108,3 +108,33 @@ export const deletePrompt = async (id) => {
     throw error;
   }
 };
+
+export const fetchUserStats = async () => {
+  try {
+    const token = await getAuthToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const response = await fetch(`${API_URL}/user/stats`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) throw new Error('Failed to fetch user stats');
+    
+    const data = await response.json();
+    return {
+      promptCount: data.promptCount || 0,
+      promptLimit: data.promptLimit || 50,
+      isPremium: data.subscription?.isActive || false,
+      isAdvancedUser: data.isAdvancedUser || false,
+      subscription: data.subscription || null,
+      activeSubscriptions: data.activeSubscriptions || []
+    };
+  } catch (err) {
+    console.error('Error fetching user stats:', err);
+    throw err;
+  }
+}

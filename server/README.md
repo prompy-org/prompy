@@ -30,7 +30,6 @@ Backend server for the Prompy Chrome extension, providing API endpoints for prom
    ```
    PORT=5000
    MONGODB_URI=mongodb://localhost:27017/prompy
-   USE_TEST_DATA=true  # Set to false when using a real database
    ```
 
 ### Running the Server

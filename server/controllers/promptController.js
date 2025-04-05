@@ -6,44 +6,12 @@ import PLANS from '../constants/plans.js';
 
 dotenv.config();
 
-// Test data for local development
-const testPrompts = [
-  {
-    _id: '1',
-    title: 'Code Review',
-    content: 'Please review this code and suggest improvements...',
-    userId: 'test-user-1',
-    tags: ['code', 'review'],
-    createdAt: '2023-01-01T12:00:00Z',
-    updatedAt: '2023-01-01T12:00:00Z'
-  },
-  {
-    _id: '2',
-    title: 'Blog Post Ideas',
-    content: 'Generate 5 blog post ideas about React development...',
-    userId: 'test-user-1',
-    tags: ['blog', 'ideas', 'react'],
-    createdAt: '2023-01-02T12:00:00Z',
-    updatedAt: '2023-01-02T12:00:00Z'
-  }
-];
-
-// Use test data if DB is not connected (for local testing)
-const useTestData = process.env.USE_TEST_DATA === 'true';
-
 // GET all prompts for a user
 export const getPrompts = async (req, res) => {
   try {
     // Get userId from authenticated user
     const userId = req.user.id;
     // console.log('getPrompts - User ID:', userId);
-    
-    if (useTestData) {
-      // console.log('getPrompts - Using test data');
-      const filteredPrompts = testPrompts.filter(p => p.userId === userId);
-      // console.log('getPrompts - Found prompts:', filteredPrompts.length);
-      return res.status(200).json(filteredPrompts);
-    }
     
     // console.log('getPrompts - Using database');
     const prompts = await Prompt.find({ userId }).sort({ updatedAt: -1 });
@@ -59,12 +27,6 @@ export const getPrompts = async (req, res) => {
 export const getPromptById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    if (useTestData) {
-      const prompt = testPrompts.find(p => p._id === id);
-      if (!prompt) return res.status(404).json({ message: 'Prompt not found' });
-      return res.status(200).json(prompt);
-    }
     
     const prompt = await Prompt.findById(id);
     if (!prompt) return res.status(404).json({ message: 'Prompt not found' });
@@ -154,21 +116,6 @@ export const updatePrompt = async (req, res) => {
     const { id } = req.params;
     const { title, content, tags } = req.body;
     
-    if (useTestData) {
-      const promptIndex = testPrompts.findIndex(p => p._id === id);
-      if (promptIndex === -1) return res.status(404).json({ message: 'Prompt not found' });
-      
-      testPrompts[promptIndex] = {
-        ...testPrompts[promptIndex],
-        title: title || testPrompts[promptIndex].title,
-        content: content || testPrompts[promptIndex].content,
-        tags: tags || testPrompts[promptIndex].tags,
-        updatedAt: new Date().toISOString()
-      };
-      
-      return res.status(200).json(testPrompts[promptIndex]);
-    }
-    
     const updatedPrompt = await Prompt.findByIdAndUpdate(
       id,
       { title, content, tags },
@@ -187,14 +134,6 @@ export const updatePrompt = async (req, res) => {
 export const deletePrompt = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    if (useTestData) {
-      const promptIndex = testPrompts.findIndex(p => p._id === id);
-      if (promptIndex === -1) return res.status(404).json({ message: 'Prompt not found' });
-      
-      testPrompts.splice(promptIndex, 1);
-      return res.status(200).json({ message: 'Prompt deleted successfully' });
-    }
     
     const deletedPrompt = await Prompt.findByIdAndDelete(id);
     

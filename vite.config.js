@@ -11,6 +11,8 @@ export default defineConfig({
       input: {
         // eslint-disable-next-line no-undef
         main: resolve(__dirname, 'index.html'),
+        background: resolve(__dirname, 'public/background.js'),
+        options: resolve(__dirname, 'public/options.html')
       },
       output: {
         entryFileNames: '[name].js',
@@ -27,6 +29,6 @@ export default defineConfig({
   define: {
     // Make env variables available to the client
     // eslint-disable-next-line no-undef
-    'process.env.API_URL': JSON.stringify(process.env.VITE_API_URL)
+    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL)
   }
 })

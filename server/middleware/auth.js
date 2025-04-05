@@ -19,7 +19,7 @@ export const verifyToken = (req, res, next) => {
   }
   
   try {
-    const jwtSecret = process.env.JWT_SECRET || 'test-jwt-secret';
+    const jwtSecret = process.env.JWT_SECRET;
     // console.log('Auth middleware - Using JWT secret:', jwtSecret ? 'Secret present' : 'No secret');
     
     const decoded = jwt.verify(token, jwtSecret);

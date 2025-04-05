@@ -42,6 +42,7 @@ const PromptForm = ({ prompt, onSave, onCancel, isLoading }) => {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter prompt title"
           required
           disabled={isLoading}
         />
@@ -52,6 +53,7 @@ const PromptForm = ({ prompt, onSave, onCancel, isLoading }) => {
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          placeholder="Use ${{variable}} for dynamic content"
           rows={6}
           required
           disabled={isLoading}

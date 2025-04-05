@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Prompy",
   "version": "1.0.0",
-  "description": "Securely store and manage your prompts",
+  "description": "Store, manage, and access your prompts from a centralized hub—anytime, anywhere.",
   "permissions": [
     "storage",
     "identity",

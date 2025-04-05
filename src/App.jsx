@@ -37,11 +37,16 @@ function App() {
 
   // Check if dark mode was previously enabled
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    chrome.storage.sync.get(['theme'], (items) => {
+      const savedTheme = items.theme;
+      if (savedTheme === 'dark') {
+        setDarkMode(true);
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else if (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setDarkMode(true);
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    });
   }, []);
 
   // Toggle dark mode
@@ -49,13 +54,17 @@ function App() {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
     
+    const newTheme = newDarkMode ? 'dark' : 'light';
+    
     if (newDarkMode) {
       document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
     }
+    
+    // Update both localStorage and Chrome sync storage
+    localStorage.setItem('theme', newTheme);
+    chrome.storage.sync.set({ theme: newTheme });
   };
 
   // Check authentication status on load
@@ -293,15 +302,14 @@ function App() {
       {error && <div className="error-message">{error}</div>}
       
       <main>
-        {/* Add PromptLimitIndicator at the top of the main content */}
-        <PromptLimitIndicator 
+        {!isFormVisible && !isPromptViewVisible && <PromptLimitIndicator 
           promptCount={userStats.promptCount} 
           promptLimit={userStats.promptLimit}
           isPremium={userStats.isPremium}
           expiresAt={userStats.subscription?.expiresAt}
           isAdvancedUser={userStats.isAdvancedUser}
           activeSubscriptions={userStats.activeSubscriptions}
-        />
+        />}
         
         {isFormVisible ? (
           <PromptForm 

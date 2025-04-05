@@ -1,40 +1,56 @@
 import User from '../models/userModel.js';
 import Prompt from '../models/promptModel.js';
+import { checkSubscriptionExpiry } from './paymentController.js';
 
 // Get user statistics
 export const getUserStats = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Find user
+    // Check if subscription has expired before returning details
+    await checkSubscriptionExpiry(userId);
+    
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-        
-    // Get last activity (most recent prompt update)
-    const lastPrompt = await Prompt.findOne({ userId })
-      .sort({ updatedAt: -1 })
-      .limit(1);
     
-    // Prepare stats
-    const stats = {
-      promptCount: user.promptCount,
-      promptLimit: user.promptLimit,
-      isAdvancedUser: user.isAdvancedUser,
-      lastActivity: lastPrompt?.updatedAt || null,
-      createdAt: user.createdAt,
-      subscription: {
-        planId: user.subscription?.planId || null,
-        isActive: user.subscription?.isActive || false,
-        plan: user.subscription?.planId || null,
-        expiresAt: user.subscription?.endDate || null
-      }
-    };
+    // Format subscription data
+    let subscriptionData = null;
+    if (user.subscription && Object.keys(user.subscription).length > 0) {
+      subscriptionData = {
+        planId: user.subscription.planId,
+        isActive: user.subscription.isActive,
+        startDate: user.subscription.startDate,
+        expiresAt: user.subscription.endDate,
+        autoRenew: user.subscription.autoRenew
+      };
+    } else if (user.isAdvancedUser) {
+      // For users with one-time payment but no subscription record
+      subscriptionData = {
+        planId: "one_time_payment_plan",
+        isActive: true
+      };
+    } else {
+      // Basic users
+      subscriptionData = {
+        planId: "plan_basic",
+        isActive: true
+      };
+    }
     
-    return res.status(200).json(stats);
+    // Return user stats
+    return res.status(200).json({
+      promptCount: user.promptCount || 0,
+      promptLimit: user.promptLimit || 50,
+      isAdvancedUser: user.isAdvancedUser || false,
+      subscription: subscriptionData,
+      activeSubscriptions: user.activeSubscriptions || [],
+      lastActivity: user.lastLogin,
+      createdAt: user.createdAt
+    });
   } catch (error) {
-    console.error('Error getting user stats:', error);
-    return res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error fetching user stats:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };

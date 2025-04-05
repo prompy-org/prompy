@@ -10,7 +10,9 @@ export default function RazorpayPayment({
   currency = 'INR', 
   planName, 
   planId = null, 
-  isSubscription = false 
+  isSubscription = false,
+  buttonText = 'Pay',
+  onBeforePayment = () => true
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -76,6 +78,9 @@ export default function RazorpayPayment({
   };
 
   const handlePayment = async () => {
+
+    if (onBeforePayment && !onBeforePayment()) return;
+
     const orderData = await createOrder();
     
     if (!orderData) return;
@@ -147,7 +152,7 @@ export default function RazorpayPayment({
       <button
         onClick={handlePayment}
         disabled={loading}
-        className="w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-primary cursor-pointer text-white py-2 px-4 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? (
           <span className="flex items-center justify-center">
@@ -156,7 +161,7 @@ export default function RazorpayPayment({
           </span>
         ) : (
           <span>
-            {isSubscription ? 'Subscribe' : 'Pay'} {currency} {amount}
+            {buttonText} {currency} {amount}
           </span>
         )}
       </button>

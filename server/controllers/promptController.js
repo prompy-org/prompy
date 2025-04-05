@@ -91,12 +91,30 @@ export const createPrompt = async (req, res) => {
     
     // Check subscription status
     const hasActiveSubscription = user.subscription && user.subscription.isActive;
-    const isSubscriptionExpired = hasActiveSubscription && user.subscription.endDate && new Date() > new Date(user.subscription.endDate);
-    
+    const isSubscriptionExpired = hasActiveSubscription && 
+                                 user.subscription.endDate && 
+                                 new Date() > new Date(user.subscription.endDate);
+
     // If subscription has expired, update user record
     if (isSubscriptionExpired) {
       user.subscription.isActive = false;
-      user.promptLimit = user.isAdvancedUser ? PLANS.ONE_TIME_PAYMENT_PLAN.promptLimit : PLANS.FREE_TIER.promptLimit; // Reset to free tier limit
+      
+      // Restore previous status after subscription expiry
+      if (user.previousStatus) {
+        // If user was advanced before subscription, keep them advanced with 300 limit
+        if (user.previousStatus.isAdvancedUser) {
+          user.promptLimit = PLANS.ONE_TIME_PAYMENT_PLAN.promptLimit; // 300
+        } else {
+          // Otherwise revert to basic user limit
+          user.promptLimit = PLANS.FREE_TIER.promptLimit; // 50
+        }
+      } else {
+        // Fallback if no previous status (shouldn't happen with new logic)
+        user.promptLimit = user.isAdvancedUser ? 
+          PLANS.ONE_TIME_PAYMENT_PLAN.promptLimit : 
+          PLANS.FREE_TIER.promptLimit;
+      }
+      
       await user.save();
       return res.status(403).json({ message: 'Subscription expired. Please renew to create more prompts.' });
     }

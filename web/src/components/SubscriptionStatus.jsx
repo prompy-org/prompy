@@ -1,14 +1,23 @@
 import Link from "next/link";
-import { Crown, Star, Shield, Calendar } from "lucide-react";
+import { Crown, Star, Shield, Calendar, AlertTriangle, Clock } from "lucide-react";
 import plans from "@/constants/plans";
 
-export default function SubscriptionStatus({ userSubscription }) {
-  // Determine subscription status
-  const isPremium =
-    userSubscription?.planId !== "one_time_payment_plan" &&
-    userSubscription?.isActive &&
+export default function SubscriptionStatus({ userSubscription, activeSubscriptions = [], isAdvancedUser }) {
+  // Determine if user has active subscription plans
+  const hasActiveSubscription = 
+    userSubscription?.isActive && 
     userSubscription?.planId !== "plan_basic";
-  const isActive = userSubscription?.isActive;
+  
+  // Check if subscription is expired
+  const isExpired = userSubscription?.expiresAt && new Date(userSubscription.expiresAt) < new Date();
+  
+  // Sort active subscriptions by end date (furthest end date first)
+  const sortedSubscriptions = [...(activeSubscriptions || [])].sort((a, b) => 
+    new Date(b.endDate) - new Date(a.endDate)
+  );
+
+  // User is premium if they have either an active subscription or advanced user status
+  const isPremium = (hasActiveSubscription && !isExpired) || isAdvancedUser;
 
   return (
     <div className="bg-secondary rounded-lg shadow p-6 relative overflow-hidden">
@@ -34,45 +43,109 @@ export default function SubscriptionStatus({ userSubscription }) {
           <div className="flex items-center mb-4">
             <div
               className={`w-3 h-3 rounded-full mr-2 ${
-                isActive ? "bg-green-500" : "bg-red-500"
+                isPremium ? "bg-green-500" : "bg-red-500"
               }`}></div>
             <span
               className={`font-medium ${
-                isActive ? "text-green-500" : "text-red-500"
+                isPremium ? "text-green-500" : "text-red-500"
               }`}>
-              {isActive ? "Active" : "Inactive"}
+              {isPremium ? "Active" : "Inactive"}
             </span>
           </div>
 
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground">Plan</p>
-            <div className="flex items-center">
-              {isPremium && (
-                <div className="flex items-center bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-                  <Crown className="h-4 w-4 text-yellow-500 mr-1" />
-                  <p className="text-lg font-bold">Premium</p>
+          {/* Display both subscription and advanced status */}
+          <div className="space-y-4">
+            {/* Show subscription status if user has active subscriptions */}
+            {hasActiveSubscription && !isExpired && (
+              <div className="mb-4">
+                <p className="text-sm text-muted-foreground">Subscription Plan</p>
+                <div className="flex items-center">
+                  <div className="flex items-center bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
+                    <Crown className="h-4 w-4 text-yellow-500 mr-1" />
+                    <p className="text-lg font-bold">Premium</p>
+                    {/* <p className="text-sm ml-1">({isAdvancedUser ? "Advanced" : ""})</p> */}
+                  </div>
                 </div>
-              )}
-              {!isPremium && userSubscription.planId === "one_time_payment_plan" ? (
-                <p className="text-lg font-medium text-primary flex items-center"> <Crown className="h-4 w-4 mr-1" /> Extended</p>
-              ): (
+              </div>
+            )}
+            
+            {/* Show advanced user status if applicable */}
+            {isAdvancedUser && (
+              <div className="mb-4">
+                <p className="text-sm text-muted-foreground">Advanced Status</p>
+                <p className="text-lg font-medium text-primary flex items-center">
+                  <Shield className="h-4 w-4 mr-1" /> 
+                  Extended Access
+                </p>
+                {userSubscription.advancedUserSince && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Since {new Date(userSubscription.advancedUserSince).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* Show basic plan if user has neither */}
+            {!isPremium && (
+              <div className="mb-4">
+                <p className="text-sm text-muted-foreground">Plan</p>
                 <p className="text-lg font-medium">Basic</p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          {userSubscription.renewDate && (
+          {/* Active Subscriptions Section - show regardless of advanced user status */}
+          {hasActiveSubscription && !isExpired && sortedSubscriptions.length > 0 && (
+            <div className="mb-4 mt-2">
+              <p className="text-sm text-muted-foreground mb-2 flex items-center">
+                <Clock className="h-3 w-3 mr-1" />
+                Active Subscriptions
+              </p>
+              <div className="space-y-2 bg-secondary/50 p-3 rounded-md border border-primary/10">
+                {sortedSubscriptions.map((sub, index) => {
+                  // Check if this subscription is currently active (today falls between start and end dates)
+                  const now = new Date();
+                  const startDate = new Date(sub.startDate);
+                  const endDate = new Date(sub.endDate);
+                  const isCurrentlyActive = now >= startDate && now <= endDate;
+                  
+                  return (
+                    <div key={index} className={`text-sm ${isCurrentlyActive ? "border-l-2 border-primary pl-2" : ""}`}>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">
+                          {plans.find(plan => plan.id === sub.planId)?.name || sub.planName}
+                          {isCurrentlyActive && <span className="text-xs ml-1 text-primary">(Current)</span>}
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {new Date(sub.startDate).toLocaleDateString()} - {new Date(sub.endDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {index === 0 && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          All subscriptions valid until {new Date(userSubscription.endDate || sub.endDate).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Show expired message only for subscription plans */}
+          {hasActiveSubscription && isExpired && (
             <div className="mb-4">
               <p className="text-sm text-muted-foreground flex items-center">
                 <Calendar className="h-3 w-3 mr-1" />
-                Renews On
+                Subscription Expired On
               </p>
-              <p className="text-lg font-medium">
-                {new Date(userSubscription.renewDate).toLocaleDateString()}
+              <p className="text-lg font-medium text-red-500">
+                {new Date(userSubscription.expiresAt).toLocaleDateString()}
               </p>
             </div>
           )}
 
+          {/* Premium benefits section */}
           {isPremium && (
             <div className="mb-4 mt-4 space-y-2">
               <div className="flex items-center text-sm text-muted-foreground">
@@ -82,6 +155,19 @@ export default function SubscriptionStatus({ userSubscription }) {
               <div className="flex items-center text-sm text-muted-foreground">
                 <Star className="h-3 w-3 mr-1 text-primary" />
                 <span>Unlimited Prompts</span>
+              </div>
+            </div>
+          )}
+
+          {/* Expired subscription warning - only show if all subscriptions expired and user is not advanced */}
+          {hasActiveSubscription && isExpired && !isAdvancedUser && (
+            <div className="flex items-start space-x-2 p-3 bg-red-100 dark:bg-red-900/20 rounded-md text-sm mb-4">
+              <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-red-700 dark:text-red-400 font-medium">Subscription expired</p>
+                <p className="text-red-600 dark:text-red-300 mt-1">
+                  Your prompt limit has been reset to basic. Renew your subscription to regain premium benefits.
+                </p>
               </div>
             </div>
           )}

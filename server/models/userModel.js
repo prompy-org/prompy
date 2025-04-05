@@ -24,6 +24,27 @@ const subscriptionSchema = new mongoose.Schema({
   subscriptionId: String
 });
 
+const paymentSchema = new mongoose.Schema({
+  paymentId: String,
+  orderId: String,
+  planId: String,
+  amount: Number,
+  date: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const activeSubscriptionSchema = new mongoose.Schema({
+  planId: String,
+  planName: String,
+  startDate: Date,
+  endDate: Date,
+  orderId: String,
+  paymentId: String,
+  purchaseDate: Date
+});
+
 const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
@@ -46,6 +67,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  advancedUserSince: {
+    type: Date,
+    default: null
+  },
   promptLimit: {
     type: Number,
     default: 50 // Default limit for free tier
@@ -58,6 +83,22 @@ const userSchema = new mongoose.Schema({
     type: subscriptionSchema,
     default: () => ({})
   },
+  // Add this field to track previous status for reverting after subscription expiry
+  previousStatus: {
+    isAdvancedUser: {
+      type: Boolean,
+      default: false
+    },
+    promptLimit: {
+      type: Number,
+      default: 50
+    }
+  },
+  // Add this field to track multiple active subscriptions
+  activeSubscriptions: {
+    type: [activeSubscriptionSchema],
+    default: []
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -65,7 +106,8 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: Date.now
-  }
+  },
+  payments: [paymentSchema]
 });
 
 const User = mongoose.model('User', userSchema);

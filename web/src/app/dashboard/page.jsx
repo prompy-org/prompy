@@ -48,10 +48,15 @@ export default function Dashboard() {
     fetchUsageStats();
   }, []);
   
-  // Determine if user is premium
-  const isPremium = usageStats?.subscription?.planId !== 'one_time_payment_plan' && 
-                   usageStats?.subscription?.isActive && 
-                   usageStats?.subscription?.planId !== 'plan_basic';
+  // Determine if user is premium (has active subscription plans)
+  const hasActiveSubscription = usageStats?.subscription?.isActive && 
+                               usageStats?.subscription?.planId !== 'plan_basic';
+
+  // Determine if user has advanced status (one-time payment)
+  const isAdvancedUser = usageStats?.isAdvancedUser;
+
+  // User is premium if they have either an active subscription or advanced status
+  const isPremium = hasActiveSubscription;
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -101,14 +106,21 @@ export default function Dashboard() {
         
         <div className="space-y-6">
           {/* Sidebar with subscription status */}
-          <SubscriptionStatus userSubscription={usageStats?.subscription} />
+          <SubscriptionStatus 
+            isAdvancedUser={usageStats?.isAdvancedUser}
+            userSubscription={usageStats?.subscription} 
+            activeSubscriptions={usageStats?.activeSubscriptions}
+          />
           
           {/* Prompt Limit Indicator */}
           {!isLoading && !error && usageStats && (
             <PromptLimitIndicator 
               promptCount={usageStats.promptCount || 0} 
               promptLimit={usageStats.promptLimit || 50}
+              expiresAt={usageStats.subscription?.expiresAt}
               isPremium={isPremium}
+              isAdvancedUser={isAdvancedUser}
+              activeSubscriptions={usageStats.activeSubscriptions}
             />
           )}
           

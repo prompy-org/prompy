@@ -130,6 +130,18 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 4px;
   color: var(--text-primary);
   transition: background-color 0.2s;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.new-button {
+  background-color: #00ff15;
+  color: #333333;
+}
+
+.new-button:hover {
+  background-color: #00b50f!important;
+  transform: scale(1.05);
+  transition: all 0.3s;
 }
 
 .icon-button:hover {
@@ -416,16 +428,6 @@ header h1 {
   flex-direction: row;
   gap: 8px;
   justify-content: flex-end;
-}
-
-/* Improve readability */
-.icon-button {
-  color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.icon-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Add styles for the popout button */
@@ -749,6 +751,12 @@ main {
 .logo-header {
   display: flex;
   align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.logo-header:hover {
+  cursor: pointer;
 }
 
 /* Prompt Limit Indicator Styles */

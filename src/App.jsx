@@ -228,7 +228,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1 className="logo-header"> <img src="/logo.png" className='logo' alt="Prompy logo" /> Prompy</h1>
+        <a href='https://www.prompy.org' target='_blank' rel="noopener noreferrer" className="logo-header"> <img src="/logo.png" className='logo' alt="Prompy logo" /> Prompy</a>
         {isAuthenticated && (
           <div className="header-actions">
             <button 

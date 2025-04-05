@@ -32,7 +32,7 @@ export const fetchPrompts = async (forceRefresh = false) => {
       }
     });
     
-    if (!response.ok) throw new Error('Failed to fetch prompts');
+    if (!response.ok) throw new Error(`Failed to fetch prompts: ${response.statusText}`);
     const prompts = await response.json();
     
     // Cache the fetched prompts
@@ -59,7 +59,7 @@ export const createPrompt = async (promptData) => {
       body: JSON.stringify(promptData)
     });
     
-    if (!response.ok) throw new Error('Failed to create prompt');
+    if (!response.ok) throw new Error(`Failed to create prompt: ${response.statusText}`);
     return await response.json();
   } catch (error) {
     console.error('Error creating prompt:', error);
@@ -81,7 +81,7 @@ export const updatePrompt = async (id, promptData) => {
       body: JSON.stringify(promptData)
     });
     
-    if (!response.ok) throw new Error('Failed to update prompt');
+    if (!response.ok) throw new Error(`Failed to update prompt: ${response.statusText}`);
     return await response.json();
   } catch (error) {
     console.error('Error updating prompt:', error);
@@ -101,7 +101,7 @@ export const deletePrompt = async (id) => {
       }
     });
     
-    if (!response.ok) throw new Error('Failed to delete prompt');
+    if (!response.ok) throw new Error(`Failed to delete prompt: ${response.statusText}`);
     return await response.json();
   } catch (error) {
     console.error('Error deleting prompt:', error);
@@ -122,7 +122,7 @@ export const fetchUserStats = async () => {
       }
     });
     
-    if (!response.ok) throw new Error('Failed to fetch user stats');
+    if (!response.ok) throw new Error(`Failed to fetch user stats: ${response.statusText}`);
     
     const data = await response.json();
     return {

@@ -118,7 +118,11 @@ function App() {
     } catch (err) {
       if (err.message && err.message.includes('Prompt limit reached')) {
         setError('You have reached your prompt limit. Please upgrade to create more prompts.');
-      } else {
+      } else if (err.message && err.message.includes('Unauthorized')) {
+        setError('Session expired. Please log in to access your prompts.');
+        handleLogout();
+      } 
+      else {
         setError('Failed to fetch prompts. Please try again.');
       }
       console.error(err);

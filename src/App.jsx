@@ -62,8 +62,7 @@ function App() {
       document.documentElement.removeAttribute('data-theme');
     }
     
-    // Update both localStorage and Chrome sync storage
-    localStorage.setItem('theme', newTheme);
+    // Update Chrome sync storage
     chrome.storage.sync.set({ theme: newTheme });
   };
 

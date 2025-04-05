@@ -717,7 +717,7 @@ main {
   gap: 8px;
   padding: 8px 16px;
   background-color: var(--accent-color);
-  color: white;
+  color: #333333;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -964,4 +964,83 @@ main {
 
 .status-icon {
   margin-right: 8px;
+}
+
+/* Compact view styles */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.view-toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 4px;
+  color: var(--text-primary);
+  transition: background-color 0.2s;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.view-toggle-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--primary-color);
+}
+
+/* Compact list item styles */
+.prompt-item.compact {
+  padding: 4px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prompt-item.compact .prompt-header {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.prompt-item.compact .prompt-title {
+  margin: 0;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 120px);
+}
+
+.prompt-item.compact .prompt-actions {
+  margin-top: 0;
+  gap: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .prompt-item.compact {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .prompt-item.compact .prompt-title {
+    margin-bottom: 8px;
+    max-width: 100%;
+  }
+  
+  .prompt-item.compact .prompt-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

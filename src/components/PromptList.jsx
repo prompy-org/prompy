@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiEye, FiCopy, FiSearch, FiX } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiEye, FiCopy, FiSearch, FiX, FiList, FiGrid } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip';
 import Fuse from 'fuse.js';
 
@@ -11,6 +11,23 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
   const [allTags, setAllTags] = useState([]);
   const [tagSearchTerm, setTagSearchTerm] = useState('');
   const [filteredTags, setFilteredTags] = useState([]);
+  const [isCompactView, setIsCompactView] = useState(false);
+  
+  // Load compact view preference from storage on component mount
+  useEffect(() => {
+    chrome.storage.sync.get(['compactView'], (result) => {
+      if (result.compactView !== undefined) {
+        setIsCompactView(result.compactView);
+      }
+    });
+  }, []);
+  
+  // Update storage when compact view preference changes
+  const toggleCompactView = () => {
+    const newValue = !isCompactView;
+    setIsCompactView(newValue);
+    chrome.storage.sync.set({ compactView: newValue });
+  };
   
   // Initialize Fuse for fuzzy search
   const fuseOptions = {
@@ -122,11 +139,22 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          {searchTerm && (
-            <button onClick={clearSearch} className="clear-search">
-              <FiX />
+          <div className="search-actions">
+            {searchTerm && (
+              <button onClick={clearSearch} className="clear-search">
+                <FiX />
+              </button>
+            )}
+            <button 
+              onClick={toggleCompactView} 
+              className="view-toggle-button"
+              data-tooltip-id="view-toggle-tooltip"
+              data-tooltip-content={isCompactView ? "Switch to normal view" : "Switch to compact view"}
+            >
+              {isCompactView ? <FiGrid /> : <FiList />}
             </button>
-          )}
+            <Tooltip id="view-toggle-tooltip" />
+          </div>
         </div>
         
         {allTags.length > 0 && (
@@ -204,23 +232,27 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
             : "No prompts match your search criteria."}
         </p>
       ) : (
-        <ul>
+        <ul className={isCompactView ? "compact-view" : ""}>
           {filteredPrompts.map(prompt => (
-            <li key={prompt._id} className="prompt-item" onClick={() => onView(prompt)}>
+            <li key={prompt._id} className={`prompt-item ${isCompactView ? "compact" : ""}`} onClick={() => onView(prompt)}>
               <div className="prompt-header">
                 <h3 className="prompt-title">{prompt.title}</h3>
-                <div className="prompt-meta">
-                  <span className="prompt-date">
-                    Updated: {formatDate(prompt.updatedAt)}
-                  </span>
-                </div>
+                {!isCompactView && (
+                  <div className="prompt-meta">
+                    <span className="prompt-date">
+                      Updated: {formatDate(prompt.updatedAt)}
+                    </span>
+                  </div>
+                )}
               </div>
-              <p className="prompt-content">
-                {prompt.content.length > 100 
-                  ? `${prompt.content.substring(0, 100)}...` 
-                  : prompt.content}
-              </p>
-              {prompt.tags && prompt.tags.length > 0 && (
+              {!isCompactView && (
+                <p className="prompt-content">
+                  {prompt.content.length > 100 
+                    ? `${prompt.content.substring(0, 100)}...` 
+                    : prompt.content}
+                </p>
+              )}
+              {!isCompactView && prompt.tags && prompt.tags.length > 0 && (
                 <div className="prompt-tags">
                   {prompt.tags.map(tag => (
                     <span key={tag} className="tag">{tag}</span>

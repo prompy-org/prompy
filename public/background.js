@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
   
   // Set default options
   chrome.storage.sync.set({
-    apiUrl: process.env.VITE_API_URL,
+    apiUrl: 'http://localhost:5000/api',
     theme: 'system',
     syncFrequency: 15
   }, () => {

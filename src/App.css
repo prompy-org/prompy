@@ -422,6 +422,10 @@ header h1 {
   background-color: rgba(98, 0, 234, 0.1);
 }
 
+.theme-toggle-button:focus, .icon-button:focus {
+  outline: none;
+}
+
 /* Make buttons in a row */
 .prompt-actions {
   display: flex;

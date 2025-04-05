@@ -10,8 +10,8 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://prompy.mkhismkh.com/api/*",
     "https://prompy.onrender.com/api/*",
+    "https://api.prompy.org/api/*",
     "http://localhost:5000/api/*"
   ],
   "action": {
@@ -34,7 +34,7 @@
   },
   "externally_connectable": {
     "matches": [
-      "https://prompy.mkhismkh.com/*", 
+      "https://api.prompy.org/*", 
       "https://prompy.onrender.com/*", 
       "http://localhost:5000/*"
     ]

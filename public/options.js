@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Load saved options
   chrome.storage.sync.get({
-    apiUrl: 'https://prompy.onrender.com/api',
+    apiUrl: 'https://api.prompy.org/api',
     theme: 'system',
     syncFrequency: 15
   }, (items) => {

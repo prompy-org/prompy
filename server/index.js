@@ -18,10 +18,26 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: '*',
+const allowedOrigins = [
+  'https://www.prompy.org',
+  `chrome-extension://${process.env.EXTENSION_ID}`,
+  'http://localhost:3000'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
-}));
+};
+
+// Enable CORS with the specified options
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // Session setup

@@ -21,7 +21,6 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'https://www.prompy.org',
   `chrome-extension://${process.env.EXTENSION_ID}`,
-  'http://localhost:3000'
 ];
 
 const corsOptions = {

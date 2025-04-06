@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
   
   // Set default options
   chrome.storage.sync.set({
-    apiUrl: 'http://localhost:5000/api',
+    apiUrl: 'https://api.prompy.org/api',
     theme: 'system',
     syncFrequency: 15
   }, () => {

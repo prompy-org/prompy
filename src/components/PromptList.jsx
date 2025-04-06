@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiEye, FiCopy, FiSearch, FiX, FiList, FiGrid } from 'react-icons/fi';
+import React, { useState, useEffect, useRef } from 'react';
+import { FiEdit, FiTrash2, FiCopy, FiSearch, FiX, FiList, FiGrid, FiChevronDown, FiChevronUp, FiFilter, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip';
 import Fuse from 'fuse.js';
 
@@ -12,6 +12,23 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
   const [tagSearchTerm, setTagSearchTerm] = useState('');
   const [filteredTags, setFilteredTags] = useState([]);
   const [isCompactView, setIsCompactView] = useState(false);
+  const [sortOption, setSortOption] = useState({ field: null, direction: null });
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const sortMenuRef = useRef(null);
+  
+  // Close sort menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target)) {
+        setIsSortMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   // Load compact view preference from storage on component mount
   useEffect(() => {
@@ -50,15 +67,15 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
     setAllTags(Array.from(tags).sort());
     
     // Initial filtering
-    filterPrompts(searchTerm, selectedTags);
+    filterAndSortPrompts(searchTerm, selectedTags, sortOption);
   }, [prompts]);
   
-  // Filter prompts when search term or selected tags change
+  // Filter and sort prompts when search term, selected tags, or sort option changes
   useEffect(() => {
-    filterPrompts(searchTerm, selectedTags);
-  }, [searchTerm, selectedTags, prompts]);
+    filterAndSortPrompts(searchTerm, selectedTags, sortOption);
+  }, [searchTerm, selectedTags, sortOption, prompts]);
   
-  const filterPrompts = (term, tags) => {
+  const filterAndSortPrompts = (term, tags, sort) => {
     let results = [...prompts];
     
     // Filter by tags first if any are selected
@@ -72,6 +89,25 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
     if (term.trim()) {
       const fuse = new Fuse(results, fuseOptions);
       results = fuse.search(term).map(result => result.item);
+    }
+    
+    // Apply sorting if a sort option is selected
+    if (sort.field && sort.direction) {
+      results.sort((a, b) => {
+        let valueA, valueB;
+        
+        if (sort.field === 'title') {
+          valueA = a.title.toLowerCase();
+          valueB = b.title.toLowerCase();
+        } else if (sort.field === 'updatedAt') {
+          valueA = new Date(a.updatedAt).getTime();
+          valueB = new Date(b.updatedAt).getTime();
+        }
+        
+        if (valueA < valueB) return sort.direction === 'asc' ? -1 : 1;
+        if (valueA > valueB) return sort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
     }
     
     setFilteredPrompts(results);
@@ -127,6 +163,25 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
     setTagSearchTerm('');
   };
 
+  const handleSortOptionClick = (field) => {
+    setSortOption(prevSort => {
+      // If clicking the same field, cycle through: asc -> desc -> null
+      if (prevSort.field === field) {
+        if (prevSort.direction === 'asc') return { field, direction: 'desc' };
+        if (prevSort.direction === 'desc') return { field: null, direction: null };
+        return { field, direction: 'asc' };
+      }
+      // If clicking a different field, start with ascending
+      return { field, direction: 'asc' };
+    });
+    setIsSortMenuOpen(false);
+  };
+  
+  const getSortIcon = (field) => {
+    if (sortOption.field !== field) return null;
+    return sortOption.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />;
+  };
+
   return (
     <div className="prompt-list">
       <div className="prompt-filters">
@@ -157,10 +212,47 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
           </div>
         </div>
         
-        {allTags.length > 0 && (
-          <div className="tag-filters">
-            <div className="tag-filters-header">
-              <span>Filter by tags:</span>
+        <div className="filter-sort-container">
+          {allTags.length > 0 && (
+            <div className="tag-filters">
+              <div className="tag-filters-header">
+              <div className="sort-container" ref={sortMenuRef}>
+            <button 
+              className={`sort-button ${sortOption.field ? 'active' : ''}`}
+              onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+              data-tooltip-id="sort-tooltip"
+              data-tooltip-content="Sort prompts"
+            >
+              <FiFilter /> 
+              {sortOption.field && (
+                <span className="sort-indicator">
+                  {sortOption.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />}
+                </span>
+              )}
+              {isSortMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
+            </button>
+            <Tooltip id="sort-tooltip" />
+            
+            {isSortMenuOpen && (
+              <div className="sort-menu">
+                <div 
+                  className={`sort-option ${sortOption.field === 'title' ? 'active' : ''}`}
+                  onClick={() => handleSortOptionClick('title')}
+                >
+                  <span>Title</span>
+                  {getSortIcon('title')}
+                </div>
+                <div 
+                  className={`sort-option ${sortOption.field === 'updatedAt' ? 'active' : ''}`}
+                  onClick={() => handleSortOptionClick('updatedAt')}
+                >
+                  <span>Last Updated</span>
+                  {getSortIcon('updatedAt')}
+                </div>
+              </div>
+            )}
+          </div>
+                <span>Filter by tags:</span>
             
               <div className="tag-search-container">
                 <FiSearch className="tag-search-icon" />
@@ -302,6 +394,7 @@ const PromptList = ({ prompts, onEdit, onView, onDelete, isLoading, lastFetchTim
           ))}
         </ul>
       )}
+    </div>
     </div>
   );
 };

@@ -17,7 +17,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link 
-                href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
+                href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NEXT_PUBLIC_EXTENSION_ID}`}
                 className="rounded-full bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -77,7 +77,7 @@ export default function Home() {
             Join thousands of prompt engineers, content creators, and AI enthusiasts who use Prompy every day.
           </p>
           <Link 
-            href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
+            href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NEXT_PUBLIC_EXTENSION_ID}`}
             className="rounded-full bg-primary text-primary-foreground px-8 py-4 font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
             target="_blank"
             rel="noopener noreferrer"

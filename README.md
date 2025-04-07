@@ -56,4 +56,4 @@ Your prompts are valuable intellectual property. Prompy prioritizes your privacy
 
 Prompy is developed and maintained by Prompy-org. For support, feature requests, or bug reports, please open an issue on our GitHub repository.
 
-[Install Prompy](https://chrome.google.com/webstore/detail/prompy/your-extension-id) | [Visit Website](https://prompy.org)
+[Install Prompy](https://chrome.google.com/webstore/detail/prompy/bkkmkjndkpiaijjgkncpihjjfchjmidj) | [Visit Website](https://prompy.org)

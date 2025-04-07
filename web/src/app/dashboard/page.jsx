@@ -91,7 +91,7 @@ export default function Dashboard() {
                   The extension provides a seamless experience for creating, editing, and using your prompts directly in your browser.
                 </p>
                 <Link 
-                  href="https://chrome.google.com/webstore/detail/prompy/your-extension-id"
+                  href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NEXT_PUBLIC_EXTENSION_ID}`}
                   className="bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors inline-flex items-center"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -182,7 +182,7 @@ export default function Dashboard() {
                 </Link>
               </li>
               <li>
-                <Link href="https://chrome.google.com/webstore/detail/prompy/your-extension-id" 
+                <Link href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NEXT_PUBLIC_EXTENSION_ID}`}
                   className="text-primary hover:text-primary/80 hover:underline transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"

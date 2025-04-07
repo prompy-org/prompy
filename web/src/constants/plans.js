@@ -7,8 +7,6 @@ const plans = [
       amount: 0,
       features: [
         'Up to 50 prompts',
-        'Basic templates',
-        'Email support'
       ]
     },
     {
@@ -20,9 +18,8 @@ const plans = [
       popular: true,
       features: [
         '2100 prompts',
-        'Advanced templates',
         'Priority support',
-        'API access'
+        'Lifetime access'
       ]
     }, 
     {
@@ -33,9 +30,7 @@ const plans = [
       amount: 153,
       features: [
         'Unlimited prompts',
-        'Advanced templates',
         'Priority support',
-        'API access'
       ]
     },
     {
@@ -46,9 +41,7 @@ const plans = [
       amount: 453,
       features: [
         'Unlimited prompts',
-        'Advanced templates',
         'Priority support',
-        'API access'
       ]
     },
     {
@@ -59,9 +52,7 @@ const plans = [
       amount: 1653,
       features: [
         'Unlimited prompts',
-        'Advanced templates',
         'Priority support',
-        'API access'
       ]
     }
 ];

@@ -13,10 +13,10 @@ const PLANS = {
       id: 'one_time_payment_plan',
       name: 'Extended',
       description: 'For Advanced users',
-      amount: 353,
+      amount: 1553,
       currency: 'INR',
       interval: null, // One-time payment
-      promptLimit: 300,
+      promptLimit: 2100,
       durationMonths: 0
     },
     UNLIMITED_MONTHLY: {

@@ -16,10 +16,10 @@ const plans = [
       name: 'Extended',
       description: 'Get 300 prompts with lifetime access',
       duration: ' One-time payment',
-      amount: 353,
+      amount: 1553,
       popular: true,
       features: [
-        '300 prompts',
+        '2100 prompts',
         'Advanced templates',
         'Priority support',
         'API access'

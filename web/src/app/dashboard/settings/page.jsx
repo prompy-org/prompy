@@ -141,24 +141,6 @@ export default function SettingsPage() {
                       </p>
                     </div>
                   )}
-                  {subscriptionData?.subscription?.autoRenew !== undefined && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Auto Renewal</p>
-                      <p className="font-medium flex items-center">
-                        {subscriptionData.subscription.autoRenew ? (
-                          <>
-                            <RefreshCw className="mr-1 h-4 w-4 text-green-500" />
-                            <span className="text-green-600">Enabled</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="mr-1 h-4 w-4 text-red-500" />
-                            <span className="text-red-600">Disabled</span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
 

@@ -45,7 +45,7 @@ export default function PricingPage() {
         });
         
         // Get subscription plan ID (for unlimited plans)
-        setUserSubscription(response.data.subscription?.planId);
+        response.data.subscription.isActive && setUserSubscription(response.data.subscription?.planId);
         
         // Get advanced user status (for one-time payment)
         setIsAdvancedUser(response.data.isAdvancedUser);

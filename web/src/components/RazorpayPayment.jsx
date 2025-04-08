@@ -132,7 +132,12 @@ export default function RazorpayPayment({
       },
       
       modal: {
-        ondismiss: function() {
+        ondismiss: async function() {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/cancel-order`, {
+            razorpay_order_id: orderData.orderId,
+          }, {
+            headers: { Authorization: `Bearer ${getToken()}` }
+          });
           console.log('Payment dismissed');
         }
       }

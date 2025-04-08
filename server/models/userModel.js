@@ -63,6 +63,10 @@ const userSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
   avatar: String,
+  isAdvancedUserOrdered: {
+    type: Boolean,
+    default: false
+  },
   isAdvancedUser: {
     type: Boolean,
     default: false

@@ -74,13 +74,7 @@ export const createOrder = async (req, res) => {
     // For one-time payment plan, mark user as advanced immediately
     // The actual subscription details will be updated after payment verification
     if (planId === "one_time_payment_plan") {
-      user.isAdvancedUser = true;
-      user.advancedUserSince = new Date();
-      user.promptLimit = plan.promptLimit;
-      user.previousStatus = {
-        isAdvancedUser: true,
-        promptLimit: plan.promptLimit
-      };
+      user.isAdvancedUserOrdered = true;
     }
     
     user.markModified("subscription");
@@ -178,6 +172,17 @@ const handleSuccessfulPayment = async (orderId) => {
     if (!planKey) {
       console.error(`Plan not found for ID: ${user.subscription.planId}`);
       return;
+    }
+
+    if (user.isAdvancedUserOrdered) {
+      user.isAdvancedUserOrdered = false;
+      user.isAdvancedUser = true;
+      user.advancedUserSince = new Date();
+      user.promptLimit = plan.promptLimit;
+      user.previousStatus = {
+        isAdvancedUser: true,
+        promptLimit: plan.promptLimit
+      };
     }
 
     const plan = PLANS[planKey];
@@ -314,10 +319,13 @@ const handleFailedPayment = async (orderId) => {
       console.error(`No user found with order ID: ${orderId}`);
       return;
     }
-
+    if (user.isAdvancedUserOrdered) {
+      user.isAdvancedUserOrdered = false;
+    }
     // Reset pending upgrade flag
     user.subscription.pendingUpgrade = false;
-    user.subscription.isActive = false;
+    user.subscription.isActive = user.activeSubscriptions.length > 0 ? true : false;
+    user.subscription.planId = user.activeSubscriptions.$pop().planId;
     user.markModified("subscription");
     await user.save();
 
@@ -327,7 +335,7 @@ const handleFailedPayment = async (orderId) => {
   }
 };
 
-// Verify payment status (fallback if webhook hasn't processed)
+// Verify payment status
 export const verifyPayment = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -348,6 +356,7 @@ export const verifyPayment = async (req, res) => {
         .json({ message: `Invalid order ID format: ${orderId}` });
     }
     if (expectedSignature !== razorpay_signature) {
+      await handleFailedPayment(orderId);
       return res.status(400).json({ message: "Invalid signature" });
     }
 
@@ -439,6 +448,28 @@ export const cancelSubscription = async (req, res) => {
       .json({ message: "Subscription canceled successfully" });
   } catch (error) {
     console.error("Error canceling subscription:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { razorpay_order_id } = req.body;
+    const orderId = razorpay_order_id;
+    // Input validation
+    if (!orderId || !orderId.match(/^order_[a-zA-Z0-9_]+$/)) {
+      return res
+        .status(400)
+        .json({ message: `Invalid order ID format: ${orderId}` });
+    }
+
+    await handleFailedPayment(orderId);
+    return res
+      .status(200)
+      .json({ message: "Order canceled successfully" });
+  } catch (error) {
+    console.error("Error canceling order:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };

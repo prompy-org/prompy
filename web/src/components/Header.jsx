@@ -89,13 +89,6 @@ export default function Header() {
                       >
                         Settings
                       </Link>
-                      <Link 
-                        href="/dashboard/subscription" 
-                        className="block px-4 py-2 hover:bg-accent hover:text-accent-foreground transition-colors"
-                        onClick={closeMenus}
-                      >
-                        Subscription
-                      </Link>
                       <button
                         onClick={handleLogout}
                         className="flex items-center gap-2 w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -191,15 +184,6 @@ export default function Header() {
                       onClick={closeMenus}
                     >
                       Settings
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      href="/dashboard/subscription" 
-                      className="block py-2 hover:text-primary transition-colors"
-                      onClick={closeMenus}
-                    >
-                      Subscription
                     </Link>
                   </li>
                   <li className="border-t border-border mt-2 pt-2">

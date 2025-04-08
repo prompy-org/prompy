@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 const allowedOrigins = [
   'https://www.prompy.org',
-  `chrome-extension://${process.env.EXTENSION_ID}`,
+  `chrome-extension://${process.env.PROD_EXTENSION_ID}`,
 ];
 
 const corsOptions = {
@@ -36,6 +36,8 @@ const corsOptions = {
 
 // Enable CORS with the specified options
 app.use(cors(corsOptions));
+
+app.set('trust proxy', 3);
 
 app.use(express.json());
 

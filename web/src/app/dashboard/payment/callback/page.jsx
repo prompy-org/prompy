@@ -9,6 +9,7 @@ import PaymentStatus from '@/components/PaymentStatus';
 export default function PaymentCallback() {
   const [status, setStatus] = useState('processing');
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,6 +29,7 @@ export default function PaymentCallback() {
 
     const verifyPayment = async () => {
       try {
+        setIsLoading(true);
         const token = getToken();
         if (!token) {
           router.push('/login');
@@ -75,10 +77,12 @@ export default function PaymentCallback() {
         console.error('Error verifying payment:', error);
         setStatus('failed');
         setError('Failed to verify payment status. Please contact support.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    verifyPayment();
+    !isLoading && verifyPayment();
   }, [razorpayOrderId, razorpayPaymentId, razorpaySignature, razorpaySubscriptionId, router]);
 
   const [timeLeft, setTimeLeft] = useState(5);
@@ -100,7 +104,7 @@ export default function PaymentCallback() {
           Payment Verification
         </h1>
         
-        {status === 'processing' && (
+        {status === 'processing' || isLoading && (
           <div className="flex flex-col items-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
             <p className="text-muted-foreground">Verifying your payment...</p>

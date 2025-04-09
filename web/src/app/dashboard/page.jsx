@@ -108,6 +108,7 @@ export default function Dashboard() {
           {/* Sidebar with subscription status */}
           <SubscriptionStatus 
             isAdvancedUser={usageStats?.isAdvancedUser}
+            advancedUserSince={usageStats?.advancedUserSince}
             userSubscription={usageStats?.subscription} 
             activeSubscriptions={usageStats?.activeSubscriptions}
           />

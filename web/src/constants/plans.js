@@ -12,9 +12,9 @@ const plans = [
     {
       id: 'one_time_payment_plan',
       name: 'Extended',
-      description: 'Get 300 prompts with lifetime access',
+      description: 'Get 2100 prompts with lifetime access',
       duration: ' One-time payment',
-      amount: 1553,
+      amount: 553,
       popular: true,
       features: [
         '2100 prompts',

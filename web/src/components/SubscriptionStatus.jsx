@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Crown, Star, Shield, Calendar, AlertTriangle, Clock } from "lucide-react";
 import plans from "@/constants/plans";
 
-export default function SubscriptionStatus({ userSubscription, activeSubscriptions = [], isAdvancedUser }) {
+export default function SubscriptionStatus({ userSubscription, activeSubscriptions = [], isAdvancedUser, advancedUserSince }) {
   // Determine if user has active subscription plans
   const hasActiveSubscription = 
     userSubscription?.isActive && 
@@ -49,7 +49,9 @@ export default function SubscriptionStatus({ userSubscription, activeSubscriptio
               className={`font-medium ${
                 isPremium ? "text-green-500" : "text-red-500"
               }`}>
-              {isPremium ? "Active" : "Inactive"}
+              {isPremium ? (
+                hasActiveSubscription ? "Active" : "Advanced User"
+              ) : "Inactive"}
             </span>
           </div>
 
@@ -77,9 +79,9 @@ export default function SubscriptionStatus({ userSubscription, activeSubscriptio
                   <Shield className="h-4 w-4 mr-1" /> 
                   Extended Access
                 </p>
-                {userSubscription.advancedUserSince && (
+                {advancedUserSince && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Since {new Date(userSubscription.advancedUserSince).toLocaleDateString()}
+                    Since {new Date(advancedUserSince).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -152,10 +154,12 @@ export default function SubscriptionStatus({ userSubscription, activeSubscriptio
                 <Shield className="h-3 w-3 mr-1 text-primary" />
                 <span>Premium Support</span>
               </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Star className="h-3 w-3 mr-1 text-primary" />
-                <span>Unlimited Prompts</span>
+              {hasActiveSubscription && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Star className="h-3 w-3 mr-1 text-primary" />
+                  <span>Unlimited Prompts</span>
               </div>
+              )}
             </div>
           )}
 

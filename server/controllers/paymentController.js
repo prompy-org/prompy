@@ -163,34 +163,31 @@ const handleSuccessfulPayment = async (orderId) => {
 
     const payment = await razorpayInstance.orders.fetchPayments(orderId);
     const paymentId = payment.items[0].id;
+    
+    // Check if payment has already been processed
+    if (user.payments && user.payments.some(p => p.paymentId === paymentId)) {
+      console.log(`Payment ${paymentId} already processed for user: ${user._id}`);
+      return;
+    }
+    
     const paymentAmount = payment.items[0].amount / 100; // Convert from paise to rupees
 
     // Get plan details
-    const planKey = Object.keys(PLANS).find(
+    const planKey = user.isAdvancedUserOrdered ? "ONE_TIME_PAYMENT_PLAN" : Object.keys(PLANS).find(
       (key) => PLANS[key].id === user.subscription.planId
     );
     if (!planKey) {
       console.error(`Plan not found for ID: ${user.subscription.planId}`);
       return;
     }
-
-    if (user.isAdvancedUserOrdered) {
-      user.isAdvancedUserOrdered = false;
-      user.isAdvancedUser = true;
-      user.advancedUserSince = new Date();
-      user.promptLimit = plan.promptLimit;
-      user.previousStatus = {
-        isAdvancedUser: true,
-        promptLimit: plan.promptLimit
-      };
-    }
-
+    
     const plan = PLANS[planKey];
     const now = new Date();
     
     // Prepare update object
     const updateData = {
-      $push: { 
+      // Use $addToSet instead of $push to ensure uniqueness based on paymentId
+      $addToSet: { 
         payments: {
           paymentId: paymentId,
           orderId: orderId,
@@ -206,6 +203,16 @@ const handleSuccessfulPayment = async (orderId) => {
         promptLimit: plan.promptLimit
       }
     };
+
+    if (user.isAdvancedUserOrdered) {
+      updateData.$set.isAdvancedUserOrdered = false;
+      updateData.$set.isAdvancedUser = true;
+      updateData.$set.advancedUserSince = now;
+      updateData.$set.previousStatus = {
+        isAdvancedUser: true,
+        promptLimit: plan.promptLimit
+      };
+    }
 
     // Store previous status before applying subscription changes
     // Only store if moving to an unlimited plan
@@ -306,6 +313,14 @@ const handleSuccessfulPayment = async (orderId) => {
     console.log(`Payment processed for user: ${updatedUser._id}`);
   } catch (error) {
     console.error("Error handling successful payment:", error);
+  } finally {
+    const user = await User.findOne({ "subscription.orderId": orderId });
+    if (user) {
+      user.isAdvancedUserOrdered = false;
+      user.markModified("subscription");
+      await user.save();
+    }
+    return;
   }
 };
 

@@ -178,11 +178,6 @@ export default function Dashboard() {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/support" className="text-primary hover:text-primary/80 hover:underline transition-colors">
-                  Get Support
-                </Link>
-              </li>
-              <li>
                 <Link href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NEXT_PUBLIC_EXTENSION_ID}`}
                   className="text-primary hover:text-primary/80 hover:underline transition-colors"
                   target="_blank"

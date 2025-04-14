@@ -5,7 +5,6 @@
   "description": "Store, manage, and access your prompts from a centralized hub—anytime, anywhere.",
   "permissions": [
     "storage",
-    "identity",
     "webNavigation",
     "tabs"
   ],

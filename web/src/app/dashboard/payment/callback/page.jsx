@@ -19,7 +19,7 @@ export default function PaymentCallback() {
   const razorpaySignature = searchParams.get('razorpay_signature');
 
   useEffect(() => {
-    if (!(razorpayOrderId || razorpaySubscriptionId)) {
+    if (!(razorpayOrderId)) {
       setStatus('failed');
       setError('Invalid order or subscription ID');
       return;
@@ -69,7 +69,7 @@ export default function PaymentCallback() {
     };
 
     !isLoading && handleVerifyPayment();
-  }, [razorpayOrderId, razorpayPaymentId, razorpaySignature, razorpaySubscriptionId, router]);
+  }, [razorpayOrderId, razorpayPaymentId, razorpaySignature, router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 bg-background">
@@ -99,7 +99,7 @@ export default function PaymentCallback() {
           <PaymentStatus 
             status="error" 
             message={error} 
-            redirectPath="/dashboard/pricing" 
+            redirectPath="/pricing" 
           />
         )}
       </div>

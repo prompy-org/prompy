@@ -11,7 +11,6 @@ export default function RazorpayPayment({
   currency = 'INR', 
   planName, 
   planId = null, 
-  isSubscription = false,
   buttonText = 'Pay',
   onBeforePayment = () => true
 }) {
@@ -29,19 +28,8 @@ export default function RazorpayPayment({
         window.location.href = '/login';
         return;
       }
-      
-      const endpoint = isSubscription 
-        ? '/api/subscription/create-subscription'
-        : '/api/payment/create-order';
         
-      const payload = isSubscription 
-        ? {
-            plan_id: planId,
-            total_count: 12, // 12 billing cycles
-            customer_notify: 0,
-            notes: { planName }
-          }
-        : {
+      const payload = {
             planId,
             amount,
             currency,
@@ -52,9 +40,7 @@ export default function RazorpayPayment({
       const response = await createOrder(payload);
       
       if (response.success) {
-        const orderData = isSubscription 
-          ? response.subscription 
-          : response.order;
+        const orderData = response.order;
           
         setOrderId(orderData.orderId);
         
@@ -93,30 +79,18 @@ export default function RazorpayPayment({
       theme: { color: '#4c6ef5' },
       
       // For one-time payments
-      ...(isSubscription ? {} : {
+      ...({
         amount: amount * 100, // Convert to paise
         currency,
         order_id: orderData.orderId,
       }),
-      
-      // For subscriptions
-      ...(isSubscription ? {
-        subscription_id: orderData.orderId,
-      } : {}),
-      
       handler: function(response) {
         // Redirect to callback page with parameters
         const params = new URLSearchParams();
-        
-        if (isSubscription) {
-          params.append('razorpay_payment_id', response.razorpay_payment_id);
-          params.append('razorpay_subscription_id', response.razorpay_subscription_id);
-          params.append('razorpay_signature', response.razorpay_signature);
-        } else {
-          params.append('razorpay_payment_id', response.razorpay_payment_id);
-          params.append('razorpay_order_id', response.razorpay_order_id);
-          params.append('razorpay_signature', response.razorpay_signature);
-        }
+               
+        params.append('razorpay_payment_id', response.razorpay_payment_id);
+        params.append('razorpay_order_id', response.razorpay_order_id);
+        params.append('razorpay_signature', response.razorpay_signature);
                 
         window.location.href = `/dashboard/payment/callback?${params.toString()}`;
       },

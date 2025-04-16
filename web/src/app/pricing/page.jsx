@@ -141,7 +141,6 @@ export default function PricingPage() {
                 amount={extendedPlan.amount}
                 planName={extendedPlan.name}
                 planId={extendedPlan.id}
-                isSubscription={false}
                 onBeforePayment={handlePaymentClick}
               />
             )}
@@ -232,7 +231,6 @@ export default function PricingPage() {
                 amount={currentUnlimitedPlan.amount}
                 planName={currentUnlimitedPlan.name}
                 planId={currentUnlimitedPlan.id}
-                isSubscription={false}
                 onBeforePayment={handlePaymentClick}
                 buttonText={hasActiveSubscription ? "Renew Subscription" : "Pay"}
               />

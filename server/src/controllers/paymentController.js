@@ -358,8 +358,9 @@ export const verifyPayment = async (req, res) => {
       req.body;
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const RAZORPAY_KEY_SECRET = process.env.NODE_ENV === 'PROD' ? process.env.PROD_RAZORPAY_KEY_SECRET : process.env.DEV_RAZORPAY_KEY_SECRET;
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", RAZORPAY_KEY_SECRET)
       .update(sign, "utf-8")
       .digest("hex");
 
@@ -381,6 +382,7 @@ export const verifyPayment = async (req, res) => {
       .json({ success: true, message: "Payment verified successfully" });
   } catch (error) {
     console.error("Error verifying payment:", error);
+    const orderId = req.body.razorpay_order_id;
     await handleFailedPayment(orderId);
     return res.status(500).json({ message: "Server error" });
   }

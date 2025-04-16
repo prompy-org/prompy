@@ -81,6 +81,7 @@ router.get('/google/web', (req, res, next) => {
   // Store state and redirect URL in session
   req.session.oauthState = req.query.state;
   req.session.redirectUrl = req.query.redirect_url;
+  // console.log('redirectUrl ===========>', req.session.redirectUrl);
   
   // Use the dynamic strategy
   passport.authenticate(createGoogleStrategy(req), {
@@ -112,7 +113,8 @@ router.get('/google/web/callback',
     );
     
     // Get redirect URL from session
-    const redirectUrl = req.session.redirectUrl || process.env.NODE_ENV === 'PROD' ? process.env.PROD_FRONTEND_URL : process.env.DEV_FRONTEND_URL;
+    const redirectUrl = req.session.redirectUrl;
+    // console.log('redirectUrl callback ===========>', req.session.redirectUrl);
     
     // Redirect to the web app with the token
     res.redirect(`${redirectUrl}?token=${token}&state=${req.session.oauthState}`);

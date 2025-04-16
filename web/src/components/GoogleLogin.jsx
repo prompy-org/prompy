@@ -21,6 +21,8 @@ export default function GoogleLogin({ onLoginSuccess }) {
     
     // Get the current origin for the redirect
     const origin = window.location.origin;
+    console.log('origin', origin);
+    
     
     // Open Google OAuth login page
     window.location.href = `${process.env.NODE_ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL}/api/auth/google/web?state=${state}&redirect_url=${encodeURIComponent(`${origin}/auth/callback`)}`;

@@ -13,6 +13,7 @@ import authRoutes from './routes/authRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import { verifyToken } from './middleware/auth.js';
+import { setupScheduledTasks } from './utils/scheduledTasks.js';
 
 // Load environment variables
 dotenv.config();
@@ -52,21 +53,28 @@ app.set('trust proxy', 3);
 
 app.use(express.json());
 
+// Create the session store
+const sessionStore = MongoStore.create({
+  mongoUrl: MONGODB_URI,
+  ttl: 7 * 24 * 60 * 60, // = 7 days. Default
+  autoRemove: 'native', // Default
+  touchAfter: 24 * 3600, // time period in seconds to update session in database only once in a period regardless of how many times the session is accessed
+  crypto: {
+    secret: process.env.ENV === 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET
+  },
+  collectionName: 'sessions', // Collection name for sessions
+  autoRemoveInterval: 10 // Check expired sessions every 10 minutes (default is 10)
+});
+
+// Make the session store available to the app
+app.set('sessionStore', sessionStore);
+
 // Session setup
 app.use(session({
   secret: process.env.ENV === 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: MONGODB_URI,
-    ttl: 7 * 24 * 60 * 60, // = 7 days. Default
-    autoRemove: 'native', // Default
-    touchAfter: 24 * 3600, // time period in seconds to update session in database only once in a period regardless of how many times the session is accessed
-    crypto: {
-      secret: process.env.ENV === 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET
-    },
-    collectionName: 'sessions' // Collection name for sessions
-  }),
+  store: sessionStore,
   cookie: {
     secure: process.env.ENV === 'PROD', // Use secure cookies in production
     httpOnly: true,
@@ -93,6 +101,10 @@ app.get('/', (req, res) => {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
+
+    // Set up scheduled tasks after MongoDB connection is established
+    setupScheduledTasks(app);
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

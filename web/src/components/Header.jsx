@@ -6,13 +6,15 @@ import { usePathname } from "next/navigation";
 import { isAuthenticated, logout } from "@/services/auth";
 import { Menu, X, ChevronDown, User, LogOut } from "lucide-react";
 import ThemeToggle from './ThemeToggle';
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
-
+  const router = useRouter();
+  
   useEffect(() => {
     setIsLoggedIn(isAuthenticated());
   }, [pathname]);
@@ -26,7 +28,8 @@ export default function Header() {
     } catch (error) {
       console.error('Error during logout:', error);
       // Fallback redirection in case the logout function fails
-      window.location.href = "/";
+    } finally {
+      router.push('/');
     }
   };
 

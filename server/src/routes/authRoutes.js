@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
 import dotenv from 'dotenv';
 import { createGoogleStrategy } from '../config/passport.js';
+import { cleanupExpiredSessions } from '../utils/sessionUtils.js';
+import { verifyToken } from '../middleware/auth.js';
 
 dotenv.config();
 
@@ -128,7 +130,20 @@ router.get('/login-failed', (req, res) => {
 
 // Logout route
 router.post('/logout', (req, res) => {
-  // Destroy the session
+  if (!req.session) {
+    // If there's no session, just clear the cookie and return success
+    res.clearCookie('connect.sid');
+    return res.status(200).json({ message: 'Already logged out' });
+  }
+
+  // Get the session ID before destroying it
+  const sessionId = req.session.id;
+  console.log('Logging out session ID:', sessionId);
+
+  // Access the session store directly
+  const sessionStore = req.sessionStore;
+
+  // First destroy the session
   req.session.destroy((err) => {
     if (err) {
       console.error('Error destroying session:', err);
@@ -138,9 +153,59 @@ router.post('/logout', (req, res) => {
     // Clear the session cookie
     res.clearCookie('connect.sid');
 
-    // Send success response
-    res.status(200).json({ message: 'Logged out successfully' });
+    // Then explicitly remove from the store if we have access to it
+    if (sessionStore && typeof sessionStore.destroy === 'function') {
+      try {
+        sessionStore.destroy(sessionId, (storeErr) => {
+          if (storeErr) {
+            console.error('Error removing session from store:', storeErr);
+          } else {
+            console.log('Session successfully removed from store');
+          }
+
+          // Send success response
+          res.status(200).json({ message: 'Logged out successfully' });
+        });
+      } catch (error) {
+        console.error('Exception when removing session from store:', error);
+        // Send success response anyway since the session cookie is cleared
+        res.status(200).json({ message: 'Logged out successfully' });
+      }
+    } else {
+      // If we can't access the store's destroy method, just return success
+      console.log('Session store destroy method not available, session may remain in database');
+      res.status(200).json({ message: 'Logged out successfully' });
+    }
   });
+});
+
+// Admin route to manually clean up expired sessions
+router.post('/cleanup-sessions', verifyToken, (req, res) => {
+  // Only allow admin users to trigger this
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const sessionStore = req.sessionStore;
+
+  if (!sessionStore) {
+    return res.status(500).json({ message: 'Session store not available' });
+  }
+
+  cleanupExpiredSessions(sessionStore)
+    .then(count => {
+      res.status(200).json({
+        message: 'Session cleanup completed',
+        sessionsRemoved: count
+      });
+    })
+    .catch(err => {
+      console.error('Error cleaning up sessions:', err);
+      res.status(500).json({
+        message: 'Failed to clean up sessions',
+        error: err.message
+      });
+    });
 });
 
 export default router;

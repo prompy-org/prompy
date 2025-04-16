@@ -18,10 +18,10 @@ dotenv.config();
 
 // Configure Express app
 const app = express();
-const PORT = process.env.NODE_ENV === 'PROD' ? process.env.PROD_PORT : process.env.DEV_PORT;
+const PORT = process.env.ENV === 'PROD' ? process.env.PROD_PORT : process.env.DEV_PORT;
 
 // Middleware
-const allowedOrigins = process.env.NODE_ENV === 'PROD' ? process.env.PROD_ALLOWED_ORIGINS.split(',') : process.env.DEV_ALLOWED_ORIGINS.split(',');
+const allowedOrigins = process.env.ENV === 'PROD' ? process.env.PROD_ALLOWED_ORIGINS.split(',') : process.env.DEV_ALLOWED_ORIGINS.split(',');
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -50,7 +50,7 @@ app.use(express.json());
 
 // Session setup
 app.use(session({
-  secret: process.env.NODE_ENV == 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET,
+  secret: process.env.ENV == 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET,
   resave: false,
   saveUninitialized: false
 }));
@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
 });
 
 // Connect to MongoDB
-const MONGODB_URI = process.env.NODE_ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI;
+const MONGODB_URI = process.env.ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI;
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');

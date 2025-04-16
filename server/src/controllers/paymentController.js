@@ -358,7 +358,7 @@ export const verifyPayment = async (req, res) => {
       req.body;
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-    const RAZORPAY_KEY_SECRET = process.env.NODE_ENV === 'PROD' ? process.env.PROD_RAZORPAY_KEY_SECRET : process.env.DEV_RAZORPAY_KEY_SECRET;
+    const RAZORPAY_KEY_SECRET = process.env.ENV === 'PROD' ? process.env.PROD_RAZORPAY_KEY_SECRET : process.env.DEV_RAZORPAY_KEY_SECRET;
     const expectedSignature = crypto
       .createHmac("sha256", RAZORPAY_KEY_SECRET)
       .update(sign, "utf-8")

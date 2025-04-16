@@ -33,7 +33,7 @@ router.get('/google/callback',
     // console.log('OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
-    const jwtSecret = process.env.NODE_ENV === 'PROD' ? process.env.PROD_JWT_SECRET : process.env.DEV_JWT_SECRET;
+    const jwtSecret = process.env.ENV === 'PROD' ? process.env.PROD_JWT_SECRET : process.env.DEV_JWT_SECRET;
     const token = jwt.sign(
       { 
         id: req.user.id, 
@@ -101,7 +101,7 @@ router.get('/google/web/callback',
     // console.log('Web OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
-    const jwtSecret = process.env.NODE_ENV === 'PROD' ? process.env.PROD_JWT_SECRET : process.env.DEV_JWT_SECRET;
+    const jwtSecret = process.env.ENV === 'PROD' ? process.env.PROD_JWT_SECRET : process.env.DEV_JWT_SECRET;
     const token = jwt.sign(
       { 
         id: req.user.id, 

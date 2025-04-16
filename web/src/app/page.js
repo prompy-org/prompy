@@ -17,7 +17,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link 
-                href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NODE_ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
+                href={`https://chrome.google.com/webstore/detail/prompy/${process.env.ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
                 className="rounded-full bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 target="_blank"
                 rel="noopener noreferrer"

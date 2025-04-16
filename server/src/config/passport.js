@@ -7,10 +7,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Hard-coded values for testing (replace with env variables in production)
-const GOOGLE_CLIENT_ID = process.env.NODE_ENV === 'PROD' ? process.env.PROD_GOOGLE_CLIENT_ID : process.env.DEV_GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.NODE_ENV === 'PROD' ? process.env.PROD_GOOGLE_CLIENT_SECRET : process.env.DEV_GOOGLE_CLIENT_SECRET;
-const CALLBACK_PATH = process.env.NODE_ENV === 'PROD' ? process.env.PROD_CALLBACK_PATH : process.env.DEV_CALLBACK_PATH;
-const WEB_CALLBACK_PATH = process.env.NODE_ENV === 'PROD' ? process.env.PROD_WEB_CALLBACK_PATH : process.env.DEV_WEB_CALLBACK_PATH;
+const GOOGLE_CLIENT_ID = process.env.ENV === 'PROD' ? process.env.PROD_GOOGLE_CLIENT_ID : process.env.DEV_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.ENV === 'PROD' ? process.env.PROD_GOOGLE_CLIENT_SECRET : process.env.DEV_GOOGLE_CLIENT_SECRET;
+const CALLBACK_PATH = process.env.ENV === 'PROD' ? process.env.PROD_CALLBACK_PATH : process.env.DEV_CALLBACK_PATH;
+const WEB_CALLBACK_PATH = process.env.ENV === 'PROD' ? process.env.PROD_WEB_CALLBACK_PATH : process.env.DEV_WEB_CALLBACK_PATH;
 
 // Function to dynamically create the callback URL
 const createCallbackURL = (req) => {

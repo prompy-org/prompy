@@ -113,7 +113,7 @@ export default function Header() {
                 </li>
                 <li>
                   <Link 
-                    href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NODE_ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
+                    href={`https://chrome.google.com/webstore/detail/prompy/${process.env.ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
                     className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -209,7 +209,7 @@ export default function Header() {
                   </li>
                   <li className="mt-2">
                     <Link 
-                      href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NODE_ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
+                      href={`https://chrome.google.com/webstore/detail/prompy/${process.env.ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
                       className="block bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors text-center"
                       target="_blank"
                       rel="noopener noreferrer"

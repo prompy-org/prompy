@@ -63,7 +63,7 @@ router.get('/google/callback',
             { action: "auth_success", token: "${token}" },
             function(response) {
               if (chrome.runtime.lastError) {
-                document.body.innerHTML += '<p>Error: Could not communicate with extension. Please close this tab and try again.</p>';
+                document.body.innerHTML += '<p>Error: Could not communicate with extension. Please close this tab and try again.</p>' + '<p>Error details: ' + chrome.runtime.lastError.message + '</p>';
               } else {
                 document.body.innerHTML += '<p>Success! You can close this tab now.</p>';
               }

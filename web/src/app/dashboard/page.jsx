@@ -5,37 +5,21 @@ import Link from 'next/link';
 import SubscriptionStatus from '@/components/SubscriptionStatus';
 import PromptLimitIndicator from '@/components/PromptLimitIndicator';
 import Image from 'next/image';
-import { useTheme } from '@/components/ThemeProvider';
+// Theme is handled by Tailwind CSS
 import { Download, Crown } from 'lucide-react';
+import { getUserStats } from '@/services/userService';
 
 export default function Dashboard() {
   const [usageStats, setUsageStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { theme } = useTheme();
-  
+  // Theme is used for styling in the component
+
   useEffect(() => {
     const fetchUsageStats = async () => {
       try {
-        const token = localStorage.getItem('authToken');
-        
-        if (!token) {
-          setError('Authentication required');
-          setIsLoading(false);
-          return;
-        }
-        
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/stats`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch usage statistics');
-        }
-        
-        const data = await response.json();
+        setIsLoading(true);
+        const data = await getUserStats();
         setUsageStats(data);
       } catch (error) {
         console.error('Error fetching usage stats:', error);
@@ -44,12 +28,12 @@ export default function Dashboard() {
         setIsLoading(false);
       }
     };
-    
+
     fetchUsageStats();
   }, []);
-  
+
   // Determine if user is premium (has active subscription plans)
-  const hasActiveSubscription = usageStats?.subscription?.isActive && 
+  const hasActiveSubscription = usageStats?.subscription?.isActive &&
                                usageStats?.subscription?.planId !== 'plan_basic';
 
   // Determine if user has advanced status (one-time payment)
@@ -57,7 +41,7 @@ export default function Dashboard() {
 
   // User is premium if they have either an active subscription or advanced status
   const isPremium = hasActiveSubscription;
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 flex items-center">
@@ -69,28 +53,28 @@ export default function Dashboard() {
           </span>
         )}
       </h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           {/* Main dashboard content */}
           <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-6">Manage Your Prompts</h2>
-            
+
             <div className="text-center py-8 space-y-6">
               <div className="max-w-md mx-auto">
-                <Image 
-                  src="/extension-preview.png" 
-                  alt="Chrome Extension" 
-                  width={120} 
+                <Image
+                  src="/extension-preview.png"
+                  alt="Chrome Extension"
+                  width={120}
                   height={120}
                   className="mx-auto mb-4"
                 />
                 <h3 className="text-lg font-medium mb-2">Install Our Chrome Extension</h3>
                 <p className="text-muted-foreground mb-6">
-                  To access and manage your prompts, please install our Chrome extension. 
+                  To access and manage your prompts, please install our Chrome extension.
                   The extension provides a seamless experience for creating, editing, and using your prompts directly in your browser.
                 </p>
-                <Link 
+                <Link
                   href={`https://chrome.google.com/webstore/detail/prompy/${process.env.NEXT_PUBLIC_EXTENSION_ID}`}
                   className="bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors inline-flex items-center"
                   target="_blank"
@@ -103,20 +87,20 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-6">
           {/* Sidebar with subscription status */}
-          <SubscriptionStatus 
+          <SubscriptionStatus
             isAdvancedUser={usageStats?.isAdvancedUser}
             advancedUserSince={usageStats?.advancedUserSince}
-            userSubscription={usageStats?.subscription} 
+            userSubscription={usageStats?.subscription}
             activeSubscriptions={usageStats?.activeSubscriptions}
           />
-          
+
           {/* Prompt Limit Indicator */}
           {!isLoading && !error && usageStats && (
-            <PromptLimitIndicator 
-              promptCount={usageStats.promptCount || 0} 
+            <PromptLimitIndicator
+              promptCount={usageStats.promptCount || 0}
               promptLimit={usageStats.promptLimit || 50}
               expiresAt={usageStats.subscription?.expiresAt}
               isPremium={isPremium}
@@ -124,7 +108,7 @@ export default function Dashboard() {
               activeSubscriptions={usageStats.activeSubscriptions}
             />
           )}
-          
+
           <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Usage Stats</h2>
             {isLoading ? (
@@ -145,16 +129,16 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm text-muted-foreground">Last Activity</p>
                   <p className="text-lg font-medium">
-                    {usageStats.lastActivity 
-                      ? new Date(usageStats.lastActivity).toLocaleDateString() 
+                    {usageStats.lastActivity
+                      ? new Date(usageStats.lastActivity).toLocaleDateString()
                       : 'No activity yet'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Account Created</p>
                   <p className="text-lg font-medium">
-                    {usageStats.createdAt 
-                      ? new Date(usageStats.createdAt).toLocaleDateString() 
+                    {usageStats.createdAt
+                      ? new Date(usageStats.createdAt).toLocaleDateString()
                       : 'Unknown'}
                   </p>
                 </div>
@@ -163,7 +147,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground">No usage data available</p>
             )}
           </div>
-          
+
           <div className="bg-secondary rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
             <ul className="space-y-2">

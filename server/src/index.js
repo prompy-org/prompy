@@ -1,6 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import { requestLogger } from './middleware/requestLogger.js';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from './config/passport.js';
@@ -20,7 +23,8 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 const allowedOrigins = [
   'https://www.prompy.org',
-  `chrome-extension://${process.env.PROD_EXTENSION_ID}`,
+  `chrome-extension://${process.env.EXTENSION_ID}`,
+  'http://localhost:3000'
 ];
 
 const corsOptions = {
@@ -36,6 +40,13 @@ const corsOptions = {
 
 // Enable CORS with the specified options
 app.use(cors(corsOptions));
+
+// Apply security middleware
+app.use(helmet());
+
+// Logging middleware
+app.use(morgan('dev'));
+app.use(requestLogger);
 
 app.set('trust proxy', 3);
 

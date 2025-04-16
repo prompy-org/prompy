@@ -79,7 +79,6 @@ export default function PrivacyPage() {
           </p>
           <ul className="space-y-2">
             <li><strong>Storage:</strong> To save your preferences and prompts locally</li>
-            <li><strong>Tabs and WebNavigation:</strong> To detect when you&apos;re using supported websites</li>
           </ul>
           
           <p>

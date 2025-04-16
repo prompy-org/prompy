@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import axios from 'axios';
 import { getToken } from '@/services/auth';
+import { cancelOrder, createOrder } from '@/services/paymentService';
 
 export default function RazorpayPayment({ 
   amount, 
@@ -18,7 +19,7 @@ export default function RazorpayPayment({
   const [error, setError] = useState(null);
   const [orderId, setOrderId] = useState(null);
 
-  const createOrder = async () => {
+  const onCreateOrder = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -48,14 +49,12 @@ export default function RazorpayPayment({
             notes: { planName }
           };
       
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await createOrder(payload);
       
-      if (response.data.success) {
+      if (response.success) {
         const orderData = isSubscription 
-          ? response.data.subscription 
-          : response.data.order;
+          ? response.subscription 
+          : response.order;
           
         setOrderId(orderData.orderId);
         
@@ -64,10 +63,10 @@ export default function RazorpayPayment({
         
         return orderData;
       } else {
-        throw new Error(response.data.message || 'Failed to create order');
+        throw new Error(response.message || 'Failed to create order');
       }
     } catch (err) {
-      if (err?.response?.data?.message) setError(err.response.data.message);
+      if (err?.response?.message) setError(err.response.message);
       else setError(err.message || 'Something went wrong');
       
       console.log('Error creating order:', err);
@@ -81,7 +80,7 @@ export default function RazorpayPayment({
 
     if (onBeforePayment && !onBeforePayment()) return;
 
-    const orderData = await createOrder();
+    const orderData = await onCreateOrder();
     
     if (!orderData) return;
     
@@ -133,10 +132,8 @@ export default function RazorpayPayment({
       
       modal: {
         ondismiss: async function() {
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/cancel-order`, {
+          await cancelOrder({
             razorpay_order_id: orderData.orderId,
-          }, {
-            headers: { Authorization: `Bearer ${getToken()}` }
           });
           console.log('Payment dismissed');
         }

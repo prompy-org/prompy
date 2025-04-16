@@ -7,7 +7,7 @@ import Link from 'next/link';
 import plans from '@/constants/plans';
 import { Check, Crown, AlertCircle } from 'lucide-react';
 import { getToken } from '@/services/auth';
-import axios from 'axios';
+import { getUserStats } from '@/services/userService';
 
 export default function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly');
@@ -40,15 +40,13 @@ export default function PricingPage() {
       }
 
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/stats`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const userStats = await getUserStats();
         
         // Get subscription plan ID (for unlimited plans)
-        response.data.subscription.isActive && setUserSubscription(response.data.subscription?.planId);
+        userStats.subscription.isActive && setUserSubscription(userStats.subscription?.planId);
         
         // Get advanced user status (for one-time payment)
-        setIsAdvancedUser(response.data.isAdvancedUser);
+        setIsAdvancedUser(userStats.isAdvancedUser);
         
         setIsLoading(false);
       } catch (error) {

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Crown, CreditCard, Calendar, Clock, AlertTriangle, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { Crown, CreditCard, Calendar, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import plans from '@/constants/plans';
+import { getUserSubscriptionDetails } from '@/services/userService';
 
 export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -15,17 +16,7 @@ export default function SettingsPage() {
     const fetchSubscriptionData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/subscription-details`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch subscription data');
-        }
-
-        const data = await response.json();
+        const data = await getUserSubscriptionDetails();
         setSubscriptionData(data);
       } catch (err) {
         console.error('Error fetching subscription data:', err);

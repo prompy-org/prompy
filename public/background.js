@@ -41,29 +41,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Listen for OAuth callback
-chrome.webNavigation.onCompleted.addListener((details) => {
-  // Check if this is our auth success page
-  if (details.url.includes('/auth-success')) {
-    // Extract token from URL
-    const url = new URL(details.url);
-    const token = url.searchParams.get('token');
-    
-    if (token) {
-      // Store token in Chrome storage
-      chrome.storage.sync.set({ authToken: token }, () => {
-        console.log('Token stored in Chrome storage');
-        
-        // Close the auth tab and open/focus the extension popup
-        chrome.tabs.remove(details.tabId);
-        
-        // Notify any open extension popups about successful login
-        chrome.runtime.sendMessage({ action: 'loginSuccess' });
-      });
-    }
-  }
-}, { url: [{ urlContains: '/auth-success' }] });
-
 // Listen for messages from web pages
 chrome.runtime.onMessageExternal.addListener(
   function(request, sender, sendResponse) {

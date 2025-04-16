@@ -1,4 +1,10 @@
 packages:
-  - "server"
-  - "web"
-  - "src"
+  - server
+  - web
+  - src
+
+ignoredBuiltDependencies:
+  - sharp
+
+onlyBuiltDependencies:
+  - esbuild

@@ -17,11 +17,17 @@ export default function Header() {
     setIsLoggedIn(isAuthenticated());
   }, [pathname]);
 
-  const handleLogout = () => {
-    logout();
-    setIsLoggedIn(false);
-    setIsUserMenuOpen(false);
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Note: logout function already handles redirection
+      setIsLoggedIn(false);
+      setIsUserMenuOpen(false);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback redirection in case the logout function fails
+      window.location.href = "/";
+    }
   };
 
   const closeMenus = () => {
@@ -43,8 +49,8 @@ export default function Header() {
               <ThemeToggle />
             </li>
             <li>
-              <Link 
-                href="/#features" 
+              <Link
+                href="/#features"
                 className="hover:text-primary transition-colors"
                 onClick={closeMenus}
               >
@@ -52,8 +58,8 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link 
-                href="/pricing" 
+              <Link
+                href="/pricing"
                 className="hover:text-primary transition-colors"
                 onClick={closeMenus}
               >
@@ -63,8 +69,8 @@ export default function Header() {
             {isLoggedIn ? (
               <>
                 <li>
-                  <Link 
-                    href="/dashboard" 
+                  <Link
+                    href="/dashboard"
                     className="hover:text-primary transition-colors"
                     onClick={closeMenus}
                   >
@@ -82,8 +88,8 @@ export default function Header() {
                   </button>
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg py-1 z-10">
-                      <Link 
-                        href="/dashboard/settings" 
+                      <Link
+                        href="/dashboard/settings"
                         className="block px-4 py-2 hover:bg-accent hover:text-accent-foreground transition-colors"
                         onClick={closeMenus}
                       >
@@ -103,8 +109,8 @@ export default function Header() {
             ) : (
               <>
                 <li>
-                  <Link 
-                    href="/login" 
+                  <Link
+                    href="/login"
                     className="hover:text-primary transition-colors"
                     onClick={closeMenus}
                   >
@@ -112,7 +118,7 @@ export default function Header() {
                   </Link>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     href={`https://chrome.google.com/webstore/detail/prompy/${process.env.ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
                     className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
                     target="_blank"
@@ -133,7 +139,7 @@ export default function Header() {
             <ThemeToggle />
           </div>
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="text-foreground"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
@@ -149,8 +155,8 @@ export default function Header() {
           <nav className="max-w-6xl mx-auto py-4 px-6">
             <ul className="flex flex-col gap-4">
               <li>
-                <Link 
-                  href="/#features" 
+                <Link
+                  href="/#features"
                   className="block py-2 hover:text-primary transition-colors"
                   onClick={closeMenus}
                 >
@@ -158,8 +164,8 @@ export default function Header() {
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/pricing" 
+                <Link
+                  href="/pricing"
                   className="block py-2 hover:text-primary transition-colors"
                   onClick={closeMenus}
                 >
@@ -169,8 +175,8 @@ export default function Header() {
               {isLoggedIn ? (
                 <>
                   <li>
-                    <Link 
-                      href="/dashboard" 
+                    <Link
+                      href="/dashboard"
                       className="block py-2 hover:text-primary transition-colors"
                       onClick={closeMenus}
                     >
@@ -178,8 +184,8 @@ export default function Header() {
                     </Link>
                   </li>
                   <li>
-                    <Link 
-                      href="/dashboard/settings" 
+                    <Link
+                      href="/dashboard/settings"
                       className="block py-2 hover:text-primary transition-colors"
                       onClick={closeMenus}
                     >
@@ -199,8 +205,8 @@ export default function Header() {
               ) : (
                 <>
                   <li>
-                    <Link 
-                      href="/login" 
+                    <Link
+                      href="/login"
                       className="block py-2 hover:text-primary transition-colors"
                       onClick={closeMenus}
                     >
@@ -208,7 +214,7 @@ export default function Header() {
                     </Link>
                   </li>
                   <li className="mt-2">
-                    <Link 
+                    <Link
                       href={`https://chrome.google.com/webstore/detail/prompy/${process.env.ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_EXTENSION_ID : process.env.NEXT_PUBLIC_DEV_EXTENSION_ID}`}
                       className="block bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors text-center"
                       target="_blank"

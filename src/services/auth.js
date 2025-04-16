@@ -37,7 +37,26 @@ const getApiUrl = async () => {
 
 // Logout user
 export const logout = async () => {
-  await removeToken();
+  try {
+    // Get API URL and token
+    const [apiUrl, token] = await Promise.all([getApiUrl(), getToken()]);
+
+    if (apiUrl && token) {
+      // Call the server-side logout endpoint
+      await fetch(`${apiUrl}/api/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error during logout:', error);
+  } finally {
+    // Always clear the token locally even if server request fails
+    await removeToken();
+  }
 };
 
 // Check if user is authenticated

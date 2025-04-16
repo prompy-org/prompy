@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { requestLogger } from './middleware/requestLogger.js';
 import dotenv from 'dotenv';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import passport from './config/passport.js';
 import promptRoutes from './routes/promptRoutes.js';
 import authRoutes from './routes/authRoutes.js';
@@ -19,6 +20,9 @@ dotenv.config();
 // Configure Express app
 const app = express();
 const PORT = process.env.ENV === 'PROD' ? process.env.PROD_PORT : process.env.DEV_PORT;
+
+// Define MongoDB URI
+const MONGODB_URI = process.env.ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI;
 
 // Middleware
 const allowedOrigins = process.env.ENV === 'PROD' ? process.env.PROD_ALLOWED_ORIGINS.split(',') : process.env.DEV_ALLOWED_ORIGINS.split(',');
@@ -50,9 +54,24 @@ app.use(express.json());
 
 // Session setup
 app.use(session({
-  secret: process.env.ENV == 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET,
+  secret: process.env.ENV === 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: MONGODB_URI,
+    ttl: 7 * 24 * 60 * 60, // = 7 days. Default
+    autoRemove: 'native', // Default
+    touchAfter: 24 * 3600, // time period in seconds to update session in database only once in a period regardless of how many times the session is accessed
+    crypto: {
+      secret: process.env.ENV === 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET
+    },
+    collectionName: 'sessions' // Collection name for sessions
+  }),
+  cookie: {
+    secure: process.env.ENV === 'PROD', // Use secure cookies in production
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+  }
 }));
 
 // Initialize Passport
@@ -71,7 +90,6 @@ app.get('/', (req, res) => {
 });
 
 // Connect to MongoDB
-const MONGODB_URI = process.env.ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI;
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');

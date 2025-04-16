@@ -3,6 +3,7 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 import { createGoogleStrategy } from '../config/passport.js';
 import { cleanupExpiredSessions } from '../utils/sessionUtils.js';
 import { verifyToken } from '../middleware/auth.js';
@@ -49,7 +50,11 @@ router.get('/google/callback',
     // Get extension ID from session
     const extensionId = req.session.extensionId;
 
+    // Generate a nonce for the inline script
+    const nonce = crypto.randomBytes(16).toString('base64');
+
     // Redirect to a page that will communicate with the extension
+    res.setHeader('Content-Security-Policy', `script-src 'self' 'nonce-${nonce}'`);
     res.send(`
       <!DOCTYPE html>
       <html>
@@ -59,7 +64,7 @@ router.get('/google/callback',
       <body>
         <h2>Authentication Successful</h2>
         <p>Redirecting back to extension...</p>
-        <script>
+        <script nonce="${nonce}">
           // Send message to extension with the token
           chrome.runtime.sendMessage("${extensionId}",
             { action: "auth_success", token: "${token}" },

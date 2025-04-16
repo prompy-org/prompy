@@ -42,8 +42,22 @@ const corsOptions = {
 // Enable CORS with the specified options
 app.use(cors(corsOptions));
 
-// Apply security middleware
-app.use(helmet());
+// Apply security middleware with custom CSP configuration
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "chrome-extension:"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'", "chrome-extension:"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'"],
+    },
+  },
+}));
 
 // Logging middleware
 app.use(morgan('dev'));

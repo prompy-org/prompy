@@ -18,14 +18,10 @@ dotenv.config();
 
 // Configure Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.NODE_ENV === 'PROD' ? process.env.PROD_PORT : process.env.DEV_PORT;
 
 // Middleware
-const allowedOrigins = [
-  'https://www.prompy.org',
-  `chrome-extension://${process.env.EXTENSION_ID}`,
-  'http://localhost:3000'
-];
+const allowedOrigins = process.env.NODE_ENV === 'PROD' ? process.env.PROD_ALLOWED_ORIGINS.split(',') : process.env.DEV_ALLOWED_ORIGINS.split(',');
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -54,7 +50,7 @@ app.use(express.json());
 
 // Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.NODE_ENV == 'PROD' ? process.env.PROD_SESSION_SECRET : process.env.DEV_SESSION_SECRET,
   resave: false,
   saveUninitialized: false
 }));
@@ -75,7 +71,7 @@ app.get('/', (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.NODE_ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {

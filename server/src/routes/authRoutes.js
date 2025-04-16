@@ -33,7 +33,7 @@ router.get('/google/callback',
     // console.log('OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
-    const jwtSecret = process.env.JWT_SECRET;
+    const jwtSecret = process.env.NODE_ENV === 'PROD' ? process.env.PROD_JWT_SECRET : process.env.DEV_JWT_SECRET;
     const token = jwt.sign(
       { 
         id: req.user.id, 
@@ -100,7 +100,7 @@ router.get('/google/web/callback',
     // console.log('Web OAuth callback - User authenticated:', req.user.id);
     
     // Create JWT token
-    const jwtSecret = process.env.JWT_SECRET;
+    const jwtSecret = process.env.NODE_ENV === 'PROD' ? process.env.PROD_JWT_SECRET : process.env.DEV_JWT_SECRET;
     const token = jwt.sign(
       { 
         id: req.user.id, 
@@ -112,7 +112,7 @@ router.get('/google/web/callback',
     );
     
     // Get redirect URL from session
-    const redirectUrl = req.session.redirectUrl || process.env.FRONTEND_URL;
+    const redirectUrl = req.session.redirectUrl || process.env.NODE_ENV === 'PROD' ? process.env.PROD_FRONTEND_URL : process.env.DEV_FRONTEND_URL;
     
     // Redirect to the web app with the token
     res.redirect(`${redirectUrl}?token=${token}&state=${req.session.oauthState}`);

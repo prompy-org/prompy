@@ -71,7 +71,8 @@ app.get('/', (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.NODE_ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI)
+const MONGODB_URI = process.env.NODE_ENV === 'PROD' ? process.env.PROD_MONGODB_URI : process.env.DEV_MONGODB_URI;
+mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {

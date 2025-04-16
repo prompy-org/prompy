@@ -25,8 +25,9 @@ export default function Payment() {
     const initializePayment = async () => {
       try {
         // Initialize Razorpay checkout
+        const RAZORPAY_KEY = process.env.NODE_ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_RAZORPAY_KEY_ID : process.env.NEXT_PUBLIC_DEV_RAZORPAY_KEY_ID;
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          key: RAZORPAY_KEY,
           amount: amount,
           currency: currency,
           name: 'Prompy',

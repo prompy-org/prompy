@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import axios from 'axios';
 import { getToken } from '@/services/auth';
 import PaymentStatus from '@/components/PaymentStatus';
 import { verifyPayment } from '@/services/paymentService';
@@ -17,7 +16,6 @@ export default function PaymentCallback() {
   // Get Razorpay parameters from URL
   const razorpayPaymentId = searchParams.get('razorpay_payment_id');
   const razorpayOrderId = searchParams.get('razorpay_order_id');
-  const razorpaySubscriptionId = searchParams.get('razorpay_subscription_id');
   const razorpaySignature = searchParams.get('razorpay_signature');
 
   useEffect(() => {
@@ -45,16 +43,7 @@ export default function PaymentCallback() {
             razorpay_order_id: razorpayOrderId,
             razorpay_signature: razorpaySignature
           });
-        } 
-        else if (razorpaySubscriptionId) {
-          response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/subscription/verify-subscription`, {
-            razorpay_subscription_id: razorpaySubscriptionId,
-            razorpay_payment_id: razorpayPaymentId,
-            razorpay_signature: razorpaySignature
-          }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-        }        
+        }      
 
         if (response.success) {
           setStatus('success');

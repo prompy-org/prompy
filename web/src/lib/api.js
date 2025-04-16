@@ -3,7 +3,7 @@
  */
 
 // Base URL for the backend API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE_URL = process.env.NODE_ENV === 'PROD' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
 
 /**
  * Make a request to the backend API

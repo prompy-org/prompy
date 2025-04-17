@@ -7,7 +7,7 @@ import PromptLimitIndicator from './components/PromptLimitIndicator';
 import Login from './components/Login';
 import { fetchPrompts, createPrompt, updatePrompt, deletePrompt, fetchUserStats } from './services/api';
 import { isAuthenticated as isAuthenticatedService, logout } from './services/auth';
-import { clearCachedPrompts, getCachedPrompts, getSyncFrequency } from './services/storageService';
+import { clearCachedPrompts, getCachedPrompts, getCachedUserStats, getSyncFrequency } from './services/storageService';
 import { FiRefreshCw, FiPlus, FiLogOut, FiExternalLink, FiMoon, FiSun } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip';
 import './App.css';
@@ -87,10 +87,12 @@ function App() {
     setError(null);
     try {
       const { prompts, lastFetchTime } = await getCachedPrompts();
+      const { cachedUserStats } = await getCachedUserStats();
       
       // If we have cached prompts and aren't forcing a refresh, use them
-      if (prompts.length > 0 && !forceRefresh) {
+      if (prompts.length > 0 && !forceRefresh && cachedUserStats) {
         setPrompts(prompts);
+        setUserStats(cachedUserStats);
         setLastFetchTime(lastFetchTime);
         
         // Check if we need to refresh based on sync frequency
@@ -104,17 +106,22 @@ function App() {
             setPrompts(freshPrompts);
             setLastFetchTime(Date.now());
           }).catch(console.error);
+          fetchUserStats().then(fetchedUserStats => {
+            setUserStats(fetchedUserStats);
+          }).catch(console.error);
         }
       } else {
         // Fetch fresh data
         const data = await fetchPrompts(forceRefresh);
+        const statData = await fetchUserStats();
+        setUserStats(statData);
         setPrompts(data);
         setLastFetchTime(Date.now());
       }
       
       // Fetch user stats
-      const fetchedUserStats = await fetchUserStats();
-      setUserStats(fetchedUserStats);
+      // const fetchedUserStats = await fetchUserStats();
+      // setUserStats(fetchedUserStats);
     } catch (err) {
       if (err.message && err.message.includes('Prompt limit reached')) {
         setError('You have reached your prompt limit. Please upgrade to create more prompts.');

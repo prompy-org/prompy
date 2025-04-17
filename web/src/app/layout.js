@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Analytics } from '@vercel/analytics/next';
+import { LoadingBarProvider } from "@/components/TopLoadingBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +27,14 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <LoadingBarProvider>
         <ThemeProvider>
           <Header />
           {children}
           <Analytics mode="production"/>
           <Footer />
         </ThemeProvider>
+        </LoadingBarProvider>
       </body>
     </html>
   );

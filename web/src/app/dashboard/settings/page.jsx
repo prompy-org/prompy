@@ -5,12 +5,24 @@ import Link from 'next/link';
 import { Crown, CreditCard, Calendar, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import plans from '@/constants/plans';
 import { getUserSubscriptionDetails } from '@/services/userService';
+import { useLoadingBar } from '@/components/TopLoadingBar';
 
 export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const loadingBar = useLoadingBar();
+
+  useEffect(() => {
+    loadingBar.setAutoRun(false);
+    if (isLoading){
+      loadingBar.start();
+    } else {
+      loadingBar.done();
+      loadingBar.setAutoRun(true);
+    }
+  },[isLoading])
 
   useEffect(() => {
     const fetchSubscriptionData = async () => {

@@ -8,6 +8,7 @@ import plans from '@/constants/plans';
 import { Check, Crown, AlertCircle } from 'lucide-react';
 import { getToken } from '@/services/auth';
 import { getUserStats } from '@/services/userService';
+import { useLoadingBar } from '@/components/TopLoadingBar';
 
 export default function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly');
@@ -29,6 +30,18 @@ export default function PricingPage() {
   
   // Get current selected unlimited plan
   const currentUnlimitedPlan = unlimitedPlans[selectedPlan];
+
+  const loadingBar = useLoadingBar();
+
+  useEffect(() => {
+    loadingBar.setAutoRun(false);
+    if (isLoading){
+      loadingBar.start();
+    } else {
+      loadingBar.done();
+      loadingBar.setAutoRun(true);
+    }
+  },[isLoading])
 
   // Check if user is logged in and get subscription status
   useEffect(() => {

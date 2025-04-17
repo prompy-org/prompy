@@ -43,7 +43,7 @@ export const logout = async () => {
 
     if (apiUrl && token) {
       // Call the server-side logout endpoint
-      await fetch(`${apiUrl}/api/auth/logout`, {
+      await fetch(`${apiUrl}/auth/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,6 +1,6 @@
 
 import { getAuthToken } from './auth';
-import { getCachedPrompts, storePrompts, getSyncFrequency } from './storageService';
+import { getCachedPrompts, storePrompts, getSyncFrequency, storeUserStats } from './storageService';
 
 // Use environment variable with fallback
 const API_URL = import.meta.env.VITE_API_URL;
@@ -125,6 +125,7 @@ export const fetchUserStats = async () => {
     if (!response.ok) throw new Error(`Failed to fetch user stats: ${response.statusText}`);
     
     const data = await response.json();
+    await storeUserStats(data);
     return {
       promptCount: data.promptCount || 0,
       promptLimit: data.promptLimit || 50,

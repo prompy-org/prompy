@@ -12,6 +12,24 @@ export const storePrompts = async (prompts) => {
   });
 };
 
+export const storeUserStats = async (userStats) => {
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ 
+      cachedUserStats: userStats
+    }, () => {
+      resolve();
+    });
+  });
+};
+
+export const getCachedUserStats = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['cachedUserStats'], (result) => {
+      resolve({ cachedUserStats: result.cachedUserStats || {} });
+    });
+  });
+};
+
 // Get cached prompts from Chrome's local storage
 export const getCachedPrompts = async () => {
   return new Promise((resolve) => {

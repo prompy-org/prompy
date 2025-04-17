@@ -8,12 +8,25 @@ import Image from 'next/image';
 // Theme is handled by Tailwind CSS
 import { Download, Crown } from 'lucide-react';
 import { getUserStats } from '@/services/userService';
+import { useLoadingBar } from '@/components/TopLoadingBar';
 
 export default function Dashboard() {
   const [usageStats, setUsageStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   // Theme is used for styling in the component
+
+  const loadingBar = useLoadingBar();
+
+  useEffect(() => {
+    loadingBar.setAutoRun(false);
+    if (isLoading){
+      loadingBar.start();
+    } else {
+      loadingBar.done();
+      loadingBar.setAutoRun(true);
+    }
+  },[isLoading])
 
   useEffect(() => {
     const fetchUsageStats = async () => {

@@ -7,6 +7,7 @@ import { isAuthenticated, logout } from "@/services/auth";
 import { Menu, X, ChevronDown, User, LogOut } from "lucide-react";
 import ThemeToggle from './ThemeToggle';
 import { useRouter } from "next/navigation";
+import { useLoadingBar } from "./TopLoadingBar";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,12 +15,25 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const topLoader = useLoadingBar();
+
+  useEffect(() => {
+    topLoader.setAutoRun(false);
+    if (isLoading){
+      topLoader.start();
+    } else {
+      topLoader.done();
+      topLoader.setAutoRun(true);
+    }
+  },[isLoading])
+
   useEffect(() => {
     setIsLoggedIn(isAuthenticated());
   }, [pathname]);
 
   const handleLogout = async () => {
+    setIsLoading(true);
     try {
       await logout();
       // Note: logout function already handles redirection
@@ -29,6 +43,7 @@ export default function Header() {
       console.error('Error during logout:', error);
       // Fallback redirection in case the logout function fails
     } finally {
+      setIsLoading(false);
       router.push('/');
     }
   };
@@ -39,7 +54,7 @@ export default function Header() {
   };
 
   return (
-    <header className="py-4 px-6 border-b border-border sticky top-0 bg-background z-50">
+    <header className="py-4 px-6 border-b border-border sticky top-0 bg-background z-45">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <Link href="/" className="font-bold text-xl text-primary">
           Prompy

@@ -1,7 +1,18 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+
+// Create a separate component that uses search params
+const SearchParamsConsumer = ({ onSearchParamsChange }) => {
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    onSearchParamsChange(searchParams);
+  }, [searchParams, onSearchParamsChange]);
+  
+  return null;
+};
 
 // Create context with default values
 const LoadingBarContext = createContext({
@@ -31,9 +42,21 @@ export const LoadingBarProvider= ({
   const timeoutRef = useRef(null);
   const intervalRef = useRef(null);
   const skipNextAutoRunRef = useRef(false);
+  const searchParamsRef = useRef(null);
   
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+
+  const handleSearchParamsChange = React.useCallback((params) => {
+    searchParamsRef.current = params;
+    if (autoRunEnabled) {
+      start();
+      // Simulate page loaded after some time
+      const timeout = setTimeout(() => {
+        done();
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [autoRunEnabled]);
 
   // Start the loading bar
   const start = () => {
@@ -107,7 +130,7 @@ export const LoadingBarProvider= ({
       }, 500);
       return () => clearTimeout(timeout);
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Clean up timeouts and intervals on unmount
   useEffect(() => {
@@ -128,6 +151,9 @@ export const LoadingBarProvider= ({
         setAutoRun: handleSetAutoRun,
       }}
     >
+      <Suspense fallback={null}>
+        <SearchParamsConsumer onSearchParamsChange={handleSearchParamsChange} />
+      </Suspense>
       {isLoading && (
         <div
           className="fixed top-0 left-0 z-50 w-full"

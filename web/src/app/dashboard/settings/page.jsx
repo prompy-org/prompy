@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Crown, CreditCard, Calendar, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import plans from '@/constants/plans';
-import { getUserSubscriptionDetails } from '@/services/userService';
+import { getUserSubscriptionDetails, deleteUser } from '@/services/userService';
 import { useLoadingBar } from '@/components/TopLoadingBar';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -13,6 +14,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const loadingBar = useLoadingBar();
+  const router = useRouter();
 
   useEffect(() => {
     loadingBar.setAutoRun(false);
@@ -31,7 +33,7 @@ export default function SettingsPage() {
         const data = await getUserSubscriptionDetails();
         setSubscriptionData(data);
       } catch (err) {
-        console.error('Error fetching subscription data:', err);
+        console.log(err)
         setError(err.message);
       } finally {
         setIsLoading(false);
@@ -41,10 +43,17 @@ export default function SettingsPage() {
     fetchSubscriptionData();
   }, []);
 
-  const handleDeleteAccount = () => {
-    // This would be replaced with actual account deletion logic
-    console.log('Account deletion requested');
-    setShowDeleteConfirm(false);
+  const handleDeleteAccount = async () => {
+    try {
+      setIsLoading(true);
+      await deleteUser();
+      router.push('/');
+    } catch (err) {
+      console.error('Error deleting account:', err);
+    } finally {
+      setIsLoading(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const formatDate = (dateString) => {

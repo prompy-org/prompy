@@ -2,10 +2,10 @@ import { fetchWithAuth } from '@/lib/api';
 import { NextResponse } from 'next/server';
 
 /**
- * GET handler for user subscription details
+ * DELETE handler for user deletion
  * Proxies the request to the backend API
  */
-export async function GET(request) {
+export async function DELETE(request) {
   try {
     // Extract the authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
@@ -20,14 +20,19 @@ export async function GET(request) {
     const token = authHeader.replace('Bearer ', '');
     
     // Make the authenticated request to the backend
-    const data = await fetchWithAuth('/api/user/subscription-details', {}, token);
+    const data = await fetchWithAuth('/api/user', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }, token);
     
     // Return the data from the backend
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in subscription details API route:', error);
+    console.error('Error in user deletion API route:', error);
     return NextResponse.json(
-      { message: error || 'Failed to fetch subscription details' },
+      { message: error.message || 'Failed to delete user' },
       { status: error.status || 500 }
     );
   }

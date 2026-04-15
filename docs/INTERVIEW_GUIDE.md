@@ -44,7 +44,7 @@ Show product value and technical maturity quickly.
 8. **Pop-out mode** to show UX optimization for active workflows
 
 ### What to narrate during demo
-- “Prompt reads are optimized by local cache + sync window.”
+- “Prompt reads are optimized by local cache + configurable sync frequency.”
 - “Server still remains source of truth for prompt limits and subscription status.”
 - “Authentication token is handled through extension storage and verified in backend JWT middleware.”
 

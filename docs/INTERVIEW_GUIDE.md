@@ -52,20 +52,20 @@ Show product value and technical maturity quickly.
 
 ## 5) High-level architecture
 
-## Components
+### Components
 - **Extension UI**: `src/` (React app)
 - **Extension runtime integration**: `public/manifest.json`, `public/background.js`, `public/options.js`
 - **Backend API**: `server/src/`
 - **Web app + API proxies**: `web/src/app` + `web/src/lib/api.js`
 
-## Core data path (extension)
+### Core data path (extension)
 1. User authenticates via Google OAuth route on backend.
 2. Backend returns JWT; extension stores it in `chrome.storage.sync`.
 3. Extension calls backend `/api/prompts` and `/api/user/stats` with Bearer token.
 4. Prompt/user stats cached in `chrome.storage.local` for fast reads.
 5. Backend enforces limits/subscription, persists in MongoDB.
 
-## Security path
+### Security path
 - Auth: Google OAuth + JWT
 - Transport controls: CORS allowlist, Helmet CSP
 - Abuse controls: rate limiters on payment/subscription endpoints
@@ -74,7 +74,7 @@ Show product value and technical maturity quickly.
 
 ## 6) Low-level implementation deep dive (with code references)
 
-## A) Extension shell and runtime behavior
+### A) Extension shell and runtime behavior
 - **MV3 manifest**: `/public/manifest.json`
   - Defines popup (`index.html`), service worker (`background.js`), options page, API host permissions.
 - **Background service worker**: `/public/background.js`
@@ -84,7 +84,7 @@ Show product value and technical maturity quickly.
 - **Options persistence**: `/public/options.js`
   - Persists theme and sync frequency via `chrome.storage.sync`.
 
-## B) Frontend app orchestration
+### B) Frontend app orchestration
 - **Root app state + flow control**: `/src/App.jsx`
   - Handles auth check, prompt loading, error states, refresh, create/edit/delete flows.
   - Uses cached data first, then conditionally background-refreshes based on sync frequency.
@@ -97,7 +97,7 @@ Show product value and technical maturity quickly.
 - **Prompt limits UX**: `/src/components/PromptLimitIndicator.jsx`
   - Visualizes usage %, premium/unlimited state, and expiry timeline.
 
-## C) Frontend service layer
+### C) Frontend service layer
 - **API integration**: `/src/services/api.js`
   - Centralized fetch methods for prompts and user stats.
   - Pulls token from auth service and caches responses in storage service.
@@ -107,7 +107,7 @@ Show product value and technical maturity quickly.
 - **Cache abstraction**: `/src/services/storageService.js`
   - Keeps prompts/user stats in local storage, sync settings in sync storage.
 
-## D) Backend API and middleware
+### D) Backend API and middleware
 - **Server setup**: `/server/src/index.js`
   - Express app, CORS allowlist, Helmet CSP, request logging, sessions in Mongo store.
   - Mounts routes for auth, prompts, payments, users.
@@ -125,7 +125,7 @@ Show product value and technical maturity quickly.
 - **Session cleanup jobs**: `/server/src/utils/scheduledTasks.js`, `/server/src/utils/sessionUtils.js`
   - Scheduled cleanup for expired sessions in Mongo session store.
 
-## E) Web app role
+### E) Web app role
 - **Landing + distribution**: `/web/src/app/page.js`
 - **Proxy API routes** (token-forwarding pattern): `/web/src/app/api/**/route.js`
 - **Shared API helper**: `/web/src/lib/api.js`
@@ -233,4 +233,3 @@ Add stronger automated test coverage (backend flows + extension integration), im
 
 ## 12) Final 60-second close statement
 “Prompy is a practical production system where UX speed and backend correctness are balanced: extension-side caching and workflow ergonomics drive adoption, while backend-enforced auth, limits, and payment state maintain integrity. The architecture is modular enough to evolve—adding richer analytics, stronger testing, and future client surfaces without rewriting the core domain logic.”
-
